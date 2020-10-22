@@ -23,7 +23,7 @@ var setup = function(data) {
 
     var center = data.center;
     var radius = data.radius;
-    var pointSize = radius * 0.002
+    var pointSize = radius * 0.008;
     radius_multiple = 2.0;
     var container = $("#dot_cloud");
     container.empty();
