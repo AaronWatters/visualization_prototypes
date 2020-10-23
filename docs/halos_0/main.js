@@ -4,6 +4,25 @@ var info = $("#info");
 var DATA_FILE = "./halos.json";
 var json_data = null;
 
+var category_colors = [
+    // r, g, b, a
+    [255, 255, 255, 1],
+    [239, 98, 36, 1],
+    [0, 162, 121, 1],
+    [54, 80, 162, 1],
+    [0, 132, 197, 1],
+    [231, 230, 32, 1],
+    [85, 186, 70, 1],
+    [58, 46, 137, 1],
+    [238, 179, 30, 1],
+    [128, 128, 0, 0],
+    [0, 128, 128, 0],
+    [128, 0, 128, 0],
+    [127, 255, 127, 0],
+    [255, 105, 180, 0],
+    [244, 164, 96, 0],
+];
+
 function load_config() {
      $.getJSON(DATA_FILE, setup).fail(on_load_failure);
 };
@@ -93,7 +112,7 @@ var get_point_arrays = function() {
     for (var halo in halos) {
         var halo_detail = halos[halo];
         //var size = 1
-        var color = [1, 1, 1];
+        var color = halo_detail.color || [1, 1, 1];
         var points = halo_detail.points;
         var show_halo = !(halo_detail.hidden);
         for (point in points) {
@@ -156,6 +175,8 @@ var set_up_controls = function() {
     var halos = json_data.halos;
     var add_checkbox = function (halo) {
         var halo_detail = halos[halo];
+        var c = category_colors[count % category_colors.length];
+        halo_detail.color = [c[0]/256.0, c[1]/256.0, c[2]/256.0];
         var controls_div = $("#controls");
         var cb = $('<input type="checkbox" checked>').appendTo(controls_div);
         $("<div>" + halo + "</div>").appendTo(controls_div);
@@ -165,8 +186,10 @@ var set_up_controls = function() {
         };
         cb.change(change);
     }
+    var count = 0
     for (var halo in halos) {
         add_checkbox(halo);
+        count += 1;
     }
 }
 
