@@ -14,6 +14,17 @@ var on_load_failure = function() {
 };
 
 var renderer, scene, camera, orbitControls, clock;
+let pointLight, ambientLight;
+
+const settings = {
+    metalness: 1.0,
+    roughness: 0.4,
+    ambientIntensity: 0.8,
+    aoMapIntensity: 1.0,
+    envMapIntensity: 1.0,
+    displacementScale: 2.436143, // from original model
+    normalScale: 1.0
+};
 
 var setup = function(data) {
     json_data = data;
@@ -32,6 +43,7 @@ var setup = function(data) {
     renderer = new THREE.WebGLRenderer( { canvas: canvas, context: context } );
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( container.width(), container.height() );
+    renderer.setClearColor( 0xffffff);
     renderer.outputEncoding = THREE.sRGBEncoding;
     container[0].appendChild( renderer.domElement );
     camera = new THREE.PerspectiveCamera( 45, container.width()/container.height(), 0.1, 10000 );
@@ -55,6 +67,20 @@ var setup = function(data) {
     scene.add(c);
     */
 
+    // env map
+    // view-source:https://threejs.org/examples/webgl_materials_displacementmap.html
+
+    const path = "../textures/cube/SwedishRoyalCastle/";
+    const format = '.jpg';
+    const urls = [
+        path + 'px' + format, path + 'nx' + format,
+        path + 'py' + format, path + 'ny' + format,
+        path + 'pz' + format, path + 'nz' + format
+    ];
+
+    const reflectionCube = new THREE.CubeTextureLoader().load( urls );
+    reflectionCube.encoding = THREE.sRGBEncoding;
+
     const geometry = new THREE.BufferGeometry();
     const positions = data.vertices;
     const normals = data.normals;
@@ -63,7 +89,30 @@ var setup = function(data) {
     //geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 );
     geometry.computeBoundingSphere();
     const material = new THREE.MeshNormalMaterial();
-    const mesh = new THREE.Mesh( geometry, material );
+    const material2 = new THREE.MeshStandardMaterial( {
+
+        color: 0x888888,
+        //color: 0x887744,
+        roughness: settings.roughness,
+        metalness: settings.metalness,
+
+        //normalMap: normalMap,
+        //normalScale: new THREE.Vector2( 1, - 1 ), // why does the normal map require negation in this case?
+
+        //aoMap: aoMap,
+        //aoMapIntensity: 1,
+
+        //displacementMap: displacementMap,
+        //displacementScale: settings.displacementScale,
+        //displacementBias: - 0.428408, // from original model
+
+        envMap: reflectionCube,
+        envMapIntensity: settings.envMapIntensity,
+
+        side: THREE.DoubleSide
+
+    } );
+    const mesh = new THREE.Mesh( geometry, material2 );
     scene.add( mesh );
 
     /*
@@ -77,6 +126,23 @@ var setup = function(data) {
     var points = new THREE.Points( geometry, material );
     scene.add(points);
     */
+
+    // view-source:https://threejs.org/examples/webgl_materials_displacementmap.html
+
+    ambientLight = new THREE.AmbientLight( 0xffffff, settings.ambientIntensity );
+    scene.add( ambientLight );
+
+    pointLight = new THREE.PointLight( 0xff0000, 0.5 );
+    pointLight.position.z = 2500;
+    scene.add( pointLight );
+
+    const pointLight2 = new THREE.PointLight( 0xff6666, 1 );
+    camera.add( pointLight2 );
+
+    const pointLight3 = new THREE.PointLight( 0x0000ff, 0.5 );
+    pointLight3.position.x = - 1000;
+    pointLight3.position.z = 1000;
+    scene.add( pointLight3 );
 
     renderer.render(scene, camera);
     orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -146,8 +212,12 @@ var get_point_arrays = function() {
 var animate = function() {
     //that.surfaces.check_update_link();
     var delta = clock.getDelta();
+    var elapsed = clock.elapsed
     orbitControls.update(delta);
     renderer.render( scene, camera );
+    var elapsed = clock.elapsedTime;
+    pointLight.position.x = 2500 * Math.cos( elapsed );
+    pointLight.position.z = 2500 * Math.sin( elapsed );
     //normals.sync_camera(that.camera);
     //velocities.sync_camera(that.camera);
     requestAnimationFrame( animate );
