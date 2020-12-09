@@ -18,9 +18,9 @@ let pointLight, ambientLight;
 
 const settings = {
     color: "0xd4af37",
-    metalness: 1.0,
-    roughness: 0.4,
-    ambientIntensity: 0.8,
+    metalness: 0.8,
+    roughness: 0.0,
+    ambientIntensity: 1.0,
     aoMapIntensity: 1.0,
     envMapIntensity: 1.0,
     displacementScale: 2.436143, // from original model
