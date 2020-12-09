@@ -22,7 +22,7 @@
     background-color: #ddd;
     width:400px;
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto;
   }
     
   

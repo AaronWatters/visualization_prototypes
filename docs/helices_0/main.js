@@ -13,10 +13,11 @@ var on_load_failure = function() {
             "You may need to run a web server to avoid cross origin restrictions.")
 };
 
-var renderer, scene, camera, orbitControls, clock;
+var renderer, scene, camera, orbitControls, clock, material;
 let pointLight, ambientLight;
 
 const settings = {
+    color: "0xd4af37",
     metalness: 1.0,
     roughness: 0.4,
     ambientIntensity: 0.8,
@@ -26,11 +27,54 @@ const settings = {
     normalScale: 1.0
 };
 
+var addSlider = function(path, attribute) {
+    var div = $(path);
+    $("<div>" + attribute + "</div>").appendTo(div);
+    var slider = $("<div/>").appendTo(div);
+    var update = function () {
+        var value = + slider.slider("option", "value");
+        settings[attribute] = value;
+        reset_settings();
+    };
+    slider.slider({
+        min: 0.0,
+        max: 1.0,
+        step: 0.01,
+        value: settings[attribute],
+        slide: update,
+        change: update,
+    });
+};
+
+var reset_settings = function () {
+    material.metalness = settings.metalness;
+    material.roughness = settings.roughness;
+    ambientLight.intensity = settings.ambientIntensity;
+};
+
 var setup = function(data) {
     json_data = data;
     info.html("json data read.");
     
     //set_up_controls();
+    addSlider("#roughnessSlider", "roughness");
+    addSlider("#metalnessSlider", "metalness");
+    addSlider("#ambientSlider", "ambientIntensity");
+
+    var colorInput = $("#colorInput");
+    var colorChange = function() {
+        var colorString = colorInput.val();
+        var color = parseInt(colorString);
+        if ((!isNaN(color)) && (color >=0 ) && (color <= 0xffffff)) {
+            info.html("changing color: " + color);
+            material.color = new THREE.Color(color);
+        } else {
+            info.html("bad color int: " + colorString);
+        }
+    };
+    colorInput.val(settings.color);
+    //colorInput.change(colorChange);
+    $("#colorUpdate").click(colorChange);
 
     var center = data.center;
     var radius = data.radius;
@@ -70,8 +114,8 @@ var setup = function(data) {
     // env map
     // view-source:https://threejs.org/examples/webgl_materials_displacementmap.html
 
-    const path = "../textures/cube/SwedishRoyalCastle/";
-    const format = '.jpg';
+    const path = "../textures/cube/pisa/";
+    const format = '.png';
     const urls = [
         path + 'px' + format, path + 'nx' + format,
         path + 'py' + format, path + 'ny' + format,
@@ -88,10 +132,10 @@ var setup = function(data) {
     geometry.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ));
     //geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 );
     geometry.computeBoundingSphere();
-    const material = new THREE.MeshNormalMaterial();
-    const material2 = new THREE.MeshStandardMaterial( {
+    //const material = new THREE.MeshNormalMaterial();
+    material = new THREE.MeshStandardMaterial( {
 
-        color: 0x888888,
+        color: parseInt(settings.color),
         //color: 0x887744,
         roughness: settings.roughness,
         metalness: settings.metalness,
@@ -112,20 +156,8 @@ var setup = function(data) {
         side: THREE.DoubleSide
 
     } );
-    const mesh = new THREE.Mesh( geometry, material2 );
+    const mesh = new THREE.Mesh( geometry, material );
     scene.add( mesh );
-
-    /*
-    var arrays = get_point_arrays();
-    pointsGeometry = new THREE.BufferGeometry();
-    var geometry = pointsGeometry;
-    geometry.setAttribute( 'position', arrays.positions );
-    geometry.setAttribute( 'color', arrays.colors );
-    //geometry.setAttribute( 'size', arrays.size );
-    var material = new THREE.PointsMaterial( { size: pointSize, vertexColors: true } );
-    var points = new THREE.Points( geometry, material );
-    scene.add(points);
-    */
 
     // view-source:https://threejs.org/examples/webgl_materials_displacementmap.html
 
