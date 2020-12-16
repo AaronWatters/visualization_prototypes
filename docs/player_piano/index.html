@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Player piano proof of concept</title>
+    <meta charset="utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/normalize.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="../css/jquery-ui.css" />
+  </head>
+
+  <body class="container">
+
+
+    <h4>Player Piano</h4>
+
+    <p>This page demonstrates synchronizing music audio with a piano visualization.</p>
+
+    <p>Load a midi file or choose one of the preset options and then play the loaded file
+        after it has been parsed by clicking the "Play Midi" button.  Stop the midi
+        play by clicking the "Reset midi" button.
+    </p>
+
+    <p>When midi playing is disabled you can press and depress the keys by clicking them.</p>
+
+    <p id="info">Page not initialized.</p>
+
+    <div id="piano">Piano should load here.</div>
+
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery-ui.js"></script>
+    <script src="../js/canvas_2d_widget_helper.js"></script>
+    <script src="../js/dual_canvas_helper.js"></script>
+    <script src="../js/Tone.js"></script>
+    <script src="../js/midi.js"></script>
+    <script src="../js/piano_keyboard.js"></script>
+    <script src="./main.js"></script>
+    <script>
+      //load_file("json/Fake.json")
+      setup();
+    </script>
+
+  </body>
+</html>
