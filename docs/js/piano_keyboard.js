@@ -468,8 +468,8 @@ requires jp_doodle, tone, and midi
                 });
                 line.transition({
                     x2: x1, y2: y1, color: s.tone_end_color,
-                })
-                short_press.annotations.push(line);
+                }, long_press.duration)
+                long_press.annotations.push(line);
             }
         };
         xy(i) {
