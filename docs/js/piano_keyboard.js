@@ -482,7 +482,7 @@ requires jp_doodle, tone, and midi
         };
     };
 
-    const fifths = ['F', 'C', 'G', 'D', 'A', 'B', 'E', 'F#', 'C#', 'G#', 'D#', 'A#'];
+    const fifths = ['F', 'C', 'G', 'D', 'A', 'E', "B", 'F#', 'C#', 'G#', 'D#', 'A#'];
     const note_names = "CDEFGAB";
     const sharped = "CDFGA";
     var sharpable = {};
