@@ -20,12 +20,8 @@
     <div class="layout">
       <section class="section">
         <div class="section__inner">
-          <h4>Helix demo</h4>
-          <p id="info">Page not initialized.</p>
-        </div>
-      </section>
-      <section class="section">
-        <div class="section__inner">
+          <h4 class="title">Helix Demo</h4>
+          <p id="info" class="subtitle">Page not initialized.</p>
           <div class="halo_grid">
             <div class="dot_cloud" id="dot_cloud">dot_cloud here</div>
             <div class="controls" id="controls">
@@ -33,11 +29,9 @@
               <div id="metalnessSlider"></div>
               <div id="ambientSlider"></div>
               <div>
-                <div>color</div>
-                <div>
-                  <input type="text" id="colorInput" />
-                  <button id="colorUpdate">update</button>
-                </div>
+                <label for="colorInput">Color</label>
+                <input type="text" id="colorInput" name="colorInput" />
+                <button id="colorUpdate">update</button>
               </div>
             </div>
           </div>
