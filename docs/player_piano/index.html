@@ -3,32 +3,34 @@
   <head>
     <title>Player piano proof of concept</title>
     <meta charset="utf-8" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Open+Sans"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
     <link rel="stylesheet" href="../css/normalize.css" />
+    <link rel="stylesheet" href="../css/base.css" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="../css/jquery-ui.css" />
   </head>
 
-  <body class="container">
+  <body>
+    <div class="layout">
+      <section class="section">
+        <div class="section__inner">
+          <h4 class="title">Player Piano</h4>
 
+          <p class="subtitle">This page demonstrates synchronizing music audio with a piano visualization.</p>
 
-    <h4>Player Piano</h4>
+          <p>
+            Load a midi file or choose one of the preset options and then play the loaded file after it has been parsed
+            by clicking the "Play Midi" button. Stop the midi play by clicking the "Reset midi" button.
+          </p>
 
-    <p>This page demonstrates synchronizing music audio with a piano visualization.</p>
+          <p>When midi playing is disabled you can press and depress the keys by clicking them.</p>
 
-    <p>Load a midi file or choose one of the preset options and then play the loaded file
-        after it has been parsed by clicking the "Play Midi" button.  Stop the midi
-        play by clicking the "Reset midi" button.
-    </p>
+          <p class="info-text" id="info">Page not initialized.</p>
 
-    <p>When midi playing is disabled you can press and depress the keys by clicking them.</p>
-
-    <p id="info">Page not initialized.</p>
-
-    <div id="piano">Piano should load here.</div>
+          <div id="piano">Piano should load here.</div>
+        </div>
+      </section>
+    </div>
 
     <script src="../js/jquery.min.js"></script>
     <script src="../js/jquery-ui.js"></script>
@@ -42,6 +44,5 @@
       //load_file("json/Fake.json")
       setup();
     </script>
-
   </body>
 </html>
