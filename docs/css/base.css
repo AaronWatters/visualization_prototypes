@@ -1,0 +1,108 @@
+/*
+* Visualization Prototypes
+* Flatiron Institute, 2020
+* @lizlove
+*/
+
+/* Base Styles
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+:root {
+  --off-black: #1c1c1c;
+  --off-white: rgb(248, 248, 248);
+  --border: rgb(221, 221, 221);
+  --purple: rgb(58, 19, 62);
+  --rad-red: rgb(255, 53, 94);
+}
+html {
+  box-sizing: border-box;
+  font-size: 10px;
+  font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+    'Open Sans', 'Helvetica Neue', sans-serif;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+body {
+  background: rgb(255, 255, 255);
+  font-size: 1.6rem;
+  color: var(--off-black);
+  margin: 0;
+}
+
+/* Typography
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0 0 2rem 0;
+  font-weight: 700;
+}
+a {
+  text-decoration: none;
+  color: var(--off-black);
+  border-bottom: 1px solid var(--rad-red);
+  cursor: pointer;
+}
+p {
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.title {
+  letter-spacing: 2px;
+  display: inline-block;
+  font-size: 2.2rem;
+}
+.subtitle {
+  margin: -0.5rem auto 2rem;
+}
+
+/* Layout
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.layout {
+  min-height: calc(100vh - 40px);
+}
+.section {
+  /* border: 2px solid var(--border); */
+}
+.section__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 0;
+}
+@media (max-width: 1200px) {
+  .section__inner {
+    width: 100%;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Lists
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+ul {
+  list-style: circle inside;
+}
+ol {
+  list-style: decimal inside;
+}
+ol,
+ul {
+  padding-left: 0;
+  margin-top: 0;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+  margin: 1.5rem 0 1.5rem 3rem;
+  font-size: 95%;
+}
+li {
+  margin-bottom: 1rem;
+}
