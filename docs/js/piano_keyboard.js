@@ -371,7 +371,7 @@ requires jp_doodle, tone, and midi
                 high_octave: 7,
                 background: "#eef",
                 alpha: 0.2,
-                radius : 5,
+                radius : 15,
             }, options);
             this.settings = s;
             this.canvas = canvas;
