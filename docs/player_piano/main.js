@@ -10,6 +10,9 @@ var setup = function () {
   element.piano.add_midi_url_button('./beethoven_opus10_1_format0.mid', 'Beethoven: Opus 10');
   element.piano.add_midi_url_button('./handel_hallelujah.mid', 'Handel: Hallelujah Chorus');
   element.piano.add_midi_url_button('./Take-Five-1.mid', 'Take five');
+  element.piano.add_midi_url_button(
+      './7862_Why-Do-Lovers-Break-Each-Others-Hearts.mid', 
+      "Why Do Lovers Break Eachother's Hearts?");
   info.html('Piano ready.');
 };
 

@@ -210,9 +210,23 @@ requires jp_doodle, tone, and midi
         this.synths.forEach(function (synth) {
           synth.disconnect();
         });
+        // clear keyboard
         for (var name in this.name_to_keys) {
           var key = this.name_to_keys[name];
           key.do_unpress();
+        }
+        // clear graphics
+        //   xxx should do this using a frame reset/redraw? or use event object?
+        var old_events = this.events;
+        for (var i=0; i<old_events.length; i++) {
+            var old_event = old_events[i];
+            if (old_event.type == "unpress") {
+                var annotations = old_event.press.annotations;
+                for (var j = 0; j < annotations.length; j++) {
+                  var annotationj = annotations[j];
+                  annotationj.forget();
+                }
+            }
         }
         this.synths = [];
         this.events = [];
