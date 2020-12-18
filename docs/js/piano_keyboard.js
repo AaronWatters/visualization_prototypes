@@ -300,14 +300,14 @@ requires jp_doodle, tone, and midi
         if (event.type == 'press') {
           presses.push(event);
           event.synth.triggerAttack(event.note, event.velocity);
-          this.info.html('press ' + event.note);
+          //this.info.html('press ' + event.note);
           if (key) {
             key.do_press();
           }
         } else if (event.type == 'unpress') {
           unpresses.push(event);
           event.synth.triggerRelease(event.note);
-          this.info.html('release ' + event.note);
+          //this.info.html('release ' + event.note);
           if (key) {
             key.do_unpress();
           }
