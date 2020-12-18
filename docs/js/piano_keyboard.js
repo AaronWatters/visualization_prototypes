@@ -126,6 +126,7 @@ requires jp_doodle, tone, and midi
           height: background_height,
           low_octave: s.low_octave,
           high_octave: s.high_octave,
+          keyboard: this,
         });
         this.single_spiral = spiral;
         s.presses_callback = function (presses, unpresses) {
@@ -164,6 +165,16 @@ requires jp_doodle, tone, and midi
           }
         });
       }
+
+      var fade_area = $("<div/>").appendTo(element);
+      $("<span> Enable graphical fading: </span>").appendTo(fade_area);
+      this.fade_check = $('<input type="checkbox" checked/>').appendTo(fade_area);
+      $("<span> [graphical fading may degrade audio quality] </span>").appendTo(fade_area);
+      this.fading = true;
+      this.fade_check.change(function() {
+          that.fading = that.fade_check.is(":checked");
+      });
+
       this.info = $('<div>keyboard drawn</div>').appendTo(element);
       this.piano = new Tone.PolySynth(Tone.Synth, {
         volume: -8,
@@ -438,6 +449,7 @@ requires jp_doodle, tone, and midi
     }
     add_circle(press) {
       var s = this.settings;
+      var fading = s.keyboard.fading;
       var name = press.note;
       var position = this.note_positions[name];
       if (position) {
@@ -449,18 +461,17 @@ requires jp_doodle, tone, and midi
           color: s.tone_start_color,
           name: true,
         });
-        circle.transition(
-          {
-            r: 0,
-            color: s.tone_end_color,
-          },
-          press.duration
-        );
+        if (fading) {
+            circle.transition({
+                r: 0, color: s.tone_end_color
+            }, press.duration);
+        }
         press.annotations.push(circle);
       }
     }
     add_link(short_press, long_press) {
       var s = this.settings;
+      var fading = s.keyboard.fading;
       var short_position = this.note_positions[short_press.note];
       var long_position = this.note_positions[long_press.note];
       if (short_position && long_position) {
@@ -474,14 +485,11 @@ requires jp_doodle, tone, and midi
           color: s.tone_start_color,
           name: true,
         });
-        line.transition(
-          {
-            x2: x1,
-            y2: y1,
-            color: s.tone_end_color,
-          },
-          long_press.duration
-        );
+        if (fading) {
+            line.transition({
+                x2: x1, y2: y1, color: s.tone_end_color,
+            }, long_press.duration)
+        }
         long_press.annotations.push(line);
       }
     }
