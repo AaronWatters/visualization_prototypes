@@ -35,7 +35,9 @@ requires jp_doodle, tone, and midi
           background: '#666',
           info_background: '#ee9',
           presses_callback: null,
+          reset_callback: null,
           add_spiral: true,
+          draw_mid: true,
         },
         options
       );
@@ -203,6 +205,11 @@ requires jp_doodle, tone, and midi
     }
     play_midi() {
       var that = this;
+      this.disable_key_draw = false;
+      var s = this.settings;
+      if (s.reset_callback) {
+          s.reset_callback();
+      }
       const midi_json = this.midi_json;
       //var synths = this.midi_synths;
       if (this.playing) {
@@ -235,6 +242,7 @@ requires jp_doodle, tone, and midi
         this.play_midi_button.html('Play midi');
       } else {
         this.play_midi_button.html('Reset midi');
+        this.disable_key_draw = true;
         this.silent = true;
         this.playing = true;
         this.events = [];
@@ -713,14 +721,18 @@ requires jp_doodle, tone, and midi
       }
     }
     do_press() {
-      this.rect.change({ color: this.settings.on_color });
+      if (!this.settings.player.disable_key_draw) {
+          this.rect.change({ color: this.settings.on_color });
+      }
       if (this.settings.player) {
         this.settings.player.press_note(this.settings.note_name);
       }
       this.pressed = true;
     }
     do_unpress() {
-      this.rect.change({ color: this.settings.off_color });
+      if (!this.settings.player.disable_key_draw) {
+          this.rect.change({ color: this.settings.off_color });
+      }
       if (this.settings.player) {
         this.settings.player.unpress_note(this.settings.note_name);
       }

@@ -2,6 +2,8 @@
 // jQuery plugin for webGL feedback programs.
 
 // xxxx should provide logic for releasing structures.
+// xxxx should support array of texture 
+// https://stackoverflow.com/questions/19592850/how-to-bind-an-array-of-textures-to-a-webgl-shader-uniform
 
 (function($) {
     $.fn.feedWebGL2 = function (options) {
@@ -63,6 +65,16 @@
                     }
                 }
             };
+            lose_context() {
+                // Lose the webGL context. This should release resources on the GPU?
+                // xxxx could explicitly dispose of resources recursively....
+                this.canvas = null;
+                this.buffers = null;
+                this.programs = null;
+                this.error = "Web context has been forced lost by API call lose_context.";
+                this.gl.getExtension('WEBGL_lose_context').loseContext();
+                this.gl = null;
+            };
             fresh_name(prefix) {
                 this.counter += 1;
                 return prefix + this.counter;
@@ -94,10 +106,14 @@
                 this.programs[prog.name] = prog;
                 return prog;
             };
-            filter_degenerate_entries(sentinel, from_buffer, to_buffer, num_components, fill){
+            filter_degenerate_entries(sentinel, from_buffer, to_buffer, num_components, fill, truncate){
                 // where the sentinel is negative the from_buffer is degenerate
                 // pack non-degenerate entries into to_buffer
                 // KISS implementation for now (no sub-buffer copies)
+                // 
+                if (!to_buffer) {
+                    to_buffer = new (from_buffer.constructor)(from_buffer.length);
+                }
                 fill = fill || 0;
                 var limit = to_buffer.length;
                 var to_index = 0;
@@ -109,6 +125,7 @@
                         from_index += num_components;
                     } else {
                         // copy
+                        //sentinel[i] = to_index; // don't do this it breaks something!
                         for (var j=0; j<num_components; j++) {
                             to_buffer[to_index] = from_buffer[from_index];
                             from_index ++;
@@ -118,6 +135,9 @@
                     if (to_index >= limit) {
                         break;  // buffer may not be large enough for all valid values.
                     }
+                }
+                if ((truncate) && (to_index < limit)) {
+                    return to_buffer.slice(0, to_index);
                 }
                 while (to_index < limit) {
                     to_buffer[to_index] = fill;
@@ -282,11 +302,33 @@
                 this.uniforms = {};
                 for (var name in uniform_descriptions) {
                     var desc = uniform_descriptions[name];
+                    var vtype = desc.vtype;
+                    var default_value = desc.default_value;
+                    if (!vtype) {
+                        // try to infer vtype like "4fv" or "3iv"
+                        var dimension = desc.dimension;
+                        if (!dimension) {
+                            if (desc.is_matrix) {
+                                throw new Error("vtype or dimension required for matrix uniform");
+                            }
+                            dimension = default_value.length;
+                        }
+                        var type = desc.type || "float";
+                        var t_initial
+                        if (type == "float") {
+                            t_initial = "f";
+                        } else if (type == "int") {
+                            t_initial = "i";
+                        } else {
+                            throw new Error("unknown type: " + type);
+                        }
+                        vtype = ("" + dimension) + t_initial + "v";
+                    }
                     var uniform = null;
                     if (desc.is_matrix) {
-                        uniform = new MatrixUniform(this, name, desc.vtype, desc.default_value);
+                        uniform = new MatrixUniform(this, name, vtype, default_value);
                     } else {
-                        uniform = new VectorUniform(this, name, desc.vtype, desc.default_value);
+                        uniform = new VectorUniform(this, name, vtype, default_value);
                     }
                     this.uniforms[name] = uniform;
                 }
@@ -294,7 +336,10 @@
                 this.inputs = {};
                 var input_descriptions = this.settings.inputs;
                 for (var name in input_descriptions) {
-                    var desc = input_descriptions[name];
+                    var desc = $.extend({
+                        // default assumption input is per vertex (not instanceds)
+                        per_vertex: true,
+                    }, input_descriptions[name]);
                     var nc = desc.num_components;
                     var ty = desc.type;
                     var input = null;
@@ -423,6 +468,11 @@
                 var feedback = this.allocated_feedbacks[name];
                 return feedback.get_array(optionalPreAllocatedArrBuffer);
             };
+            copy_feedback_to_buffer(from_feedback_name, to_buffer_name) {
+                var feedback = this.allocated_feedbacks[from_feedback_name];
+                var buffer = this.program.context.get_buffer(to_buffer_name);
+                feedback.copy_into_buffer(buffer);
+            };
             feedback_vectors(name) {
                 var feedback = this.allocated_feedbacks[name];
                 return feedback.get_vectors();
@@ -430,21 +480,30 @@
         };
 
         class FeedbackBuffer {
-            constructor(context, name, bytes_per_element) {
+            constructor(context, name, bytes_per_element, array_type) {
                 this.context = context;
                 this.name = name;
                 this.bytes_per_element = bytes_per_element || 4;
                 this.buffer = context.gl.createBuffer();
+                this.array_type = array_type || Float32Array;
                 this.byte_size = null;
                 this.num_elements = null;
             };
             copy_from_array(array) {
+                // try to convert untyped array implicitly
+                if (!array.BYTES_PER_ELEMENT) {
+                    array = new this.array_type(array);
+                }
                 var gl = this.context.gl;
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
                 gl.bufferSubData(gl.ARRAY_BUFFER, 0, array, 0, this.num_elements);
                 gl.bindBuffer(gl.ARRAY_BUFFER, null);
             };
             initialize_from_array(array) {
+                // try to convert untyped array implicitly
+                if (!array.BYTES_PER_ELEMENT) {
+                    array = new this.array_type(array);
+                }
                 if (this.bytes_per_element != array.BYTES_PER_ELEMENT) {
                     throw new Error("byte per element must match " + this.bytes_per_element + " <> " + array.BYTES_PER_ELEMENT);
                 }
@@ -474,6 +533,20 @@
                 gl.bufferData(gl.ARRAY_BUFFER, this.byte_size, gl.DYNAMIC_COPY);  //  ?? dynamic copy??
                 gl.bindBuffer(gl.ARRAY_BUFFER, null);
             };
+            get_slice(start, end) {
+                var item_length = end - start;
+                var byte_length = item_length * this.bytes_per_element;
+                var gl = this.context.gl;
+                var target = gl.ARRAY_BUFFER;
+                var srcByteOffset = start * this.bytes_per_element;
+                var dstData = new this.array_type(item_length);
+                var dstOffset = 0;
+                gl.bindBuffer(target, this.buffer);
+                // ??? byte_length or item_length here?
+                gl.getBufferSubData(target, srcByteOffset, dstData, dstOffset, byte_length);
+                gl.bindBuffer(target, null);
+                return dstData
+            };
         };
 
         class FeedbackTexture {
@@ -488,6 +561,10 @@
                 this.gl_texture = context.gl.createTexture();
             };
             load_array(array, width, height) {
+                // try to convert untyped array to float 32 implicitly
+                if (!array.BYTES_PER_ELEMENT) {
+                    array = new Float32Array(array);
+                }
                 if (width) {
                     this.width = width;
                 };
@@ -506,7 +583,48 @@
                 // xxxxx is this needed?                
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-            }
+            };
+            reload_from_buffer(feedback_buffer) {
+                // without leaving the GPU load buffer contents to the texture.
+                // bind the buffer to the gl.PIXEL_UNPACK_BUFFER
+                var gl = this.context.gl;
+                gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, feedback_buffer.buffer);
+                var target = gl.TEXTURE_2D;
+                var level = 0;
+                var xoffset = 0;
+                var yoffset = 0;
+                var height = this.height;
+                var width = this.width;
+                var format = gl[this.format];
+                var gl_type = gl[this.typ];
+                var offset = 0;
+                // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texSubImage2D
+                gl.bindTexture(target, this.gl_texture);
+                //texSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLintptr offset)
+                gl.texSubImage2D(target, level, xoffset, yoffset, width, height, format, gl_type, offset);
+                gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, null);
+            };
+            reload_array(array) {
+                // try to convert untyped array to float 32 implicitly
+                if (!array.BYTES_PER_ELEMENT) {
+                    array = new Float32Array(array);
+                }
+                // reload the texture with new array values
+                var gl = this.context.gl;
+                var target = gl.TEXTURE_2D;
+                var level = 0;
+                var xoffset = 0;
+                var yoffset = 0;
+                var height = this.height;
+                var width = this.width;
+                var format = gl[this.format];
+                var gl_type = gl[this.typ];
+                var srcData = array;
+                var srcOffset = 0;
+                // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texSubImage2D
+                gl.bindTexture(target, this.gl_texture);
+                gl.texSubImage2D(target, level, xoffset, yoffset, width, height, format, gl_type, srcData, srcOffset);
+            };
         };
 
         class FeedbackVariable {
@@ -701,8 +819,9 @@
                     gl.vertexAttribPointer(this.position, this.num_components,
                         gl.FLOAT, false, this.byte_stride, this.byte_offset);
                 } else if (this.type == "int") {
+                    // no "normalize" argument!
                     gl.vertexAttribIPointer(this.position, this.num_components,
-                        gl.INT, false, this.byte_stride, this.byte_offset);
+                        gl.INT, this.byte_stride, this.byte_offset);
                 } else {
                     throw new Error("only int and float types are supported for attributes.");
                 }
@@ -729,22 +848,38 @@
     };
 
     $.fn.feedWebGL2.setup_gl_for_example = function (container) {
+        container.empty();
+        var canvas_and_gl = $.fn.feedWebGL2.setup_canvas_and_gl();
+        var $canvas = canvas_and_gl.canvas;
+        var glCanvas = $canvas[0];
+        $canvas.appendTo(container);
+        // set up and clear the viewport
+        var gl = canvas_and_gl.gl;
+        gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+        gl.clearColor(0.8, 0.9, 1.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        return gl;
+    };
+
+    $.fn.feedWebGL2.setup_canvas_and_gl = function () {
         var init_html = `<canvas id="glcanvas" width="600" height="600">
                             Oh no! Your browser doesn't support canvas!
                         </canvas>`;
 
-        container.empty();
-        var $canvas = $(init_html).appendTo(container);
+        //container.empty();
+        //var $canvas = $(init_html).appendTo(container);
+        var $canvas = $(init_html);
         var glCanvas = $canvas[0];
 
         // **** webgl2!
         var gl = glCanvas.getContext("webgl2");
+        return {gl: gl, canvas: $canvas};
         // set up and clear the viewport
-        gl.viewport(0, 0, glCanvas.width, glCanvas.height);
-        gl.clearColor(0.8, 0.9, 1.0, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        //gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+        //gl.clearColor(0.8, 0.9, 1.0, 1.0);
+        //gl.clear(gl.COLOR_BUFFER_BIT);
 
-        return gl;
+        //return gl;
     };
 
     $.fn.feedWebGL2.trivial_example = function (container) {

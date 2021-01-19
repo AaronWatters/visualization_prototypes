@@ -97,11 +97,6 @@ XXXXX clean up events for forgotten objects
             target.invisible_canvas.canvas_2d_widget_helper(settings_overrides);
             target.test_canvas.canvas_2d_widget_helper(settings_overrides);
 
-            // set draw list to [] to collect raw draw operations (for export to svg), default: disabled
-            target.visible_canvas.draw_list = null;
-            target.invisible_canvas.draw_list = null;
-            target.test_canvas.draw_list = null;
-
             target.clear_canvas(keep_stats);
         }
 
@@ -132,30 +127,6 @@ XXXXX clean up events for forgotten objects
             target.invisible_canvas.canvas.off();   // not needed.
 
             // no need to clear the test_canvas now
-        };
-
-        target.get_raw_draw_information = function () {
-            // get low level draw operation information for export to SVG (for example).
-            var params = {};
-            // for symmetry
-            params.shape_name = "canvas";
-            var vc = target.visible_canvas;
-            params.width = vc.canvas_width;
-            params.height = vc.canvas_height;
-            params.lineWidth = vc.canvas_lineWidth;
-            params.fillColor = vc.canvas_fillColor;
-            params.strokeStyle = vc.canvas_strokeStyle;
-            params.translate_scale = vc.canvas_translate_scale;
-            params.font = vc.canvas_font;
-            params.y_up = vc.canvas_y_up;
-            params.style = vc.canvas_style;
-            // do a draw pass and collect the draw list.
-            vc.draw_list = [params];
-            target.redraw();
-            var draw_list = vc.draw_list;
-            // disable draw collection
-            vc.draw_list = null;
-            return draw_list;
         };
 
         target.local_json_data = function () {
@@ -279,15 +250,6 @@ XXXXX clean up events for forgotten objects
             target.invisible_canvas.clear_canvas();
             target.prepare_for_redraw();
             target.object_list = target.objects_drawn(target.object_list);
-            // handle deferred events
-            var t2e = target.deferred_type_to_event;
-            if (t2e) {
-                for (var event_type in t2e) {
-                    var e = t2e[event_type];
-                    target.deferred_event_handler(e);
-                }
-            }
-            target.deferred_type_to_event = null;
             // perform any transitions last to allow for temporary objects
             target.do_transitions();
         };
@@ -645,9 +607,8 @@ XXXXX clean up events for forgotten objects
             var draw_info = draw_fn(target.visible_canvas, object_info);
             // store additional information attached during the draw operation
             $.extend(object_info, draw_info);
-            if ((object_info.name) && (object_info.events !== false) && (target.deferred_type_to_event)) {
+            if ((object_info.name) && (object_info.events !== false)) {
                 // also draw invisible object using psuedocolor for event lookups
-                // only if a deferred event is outstanding
                 target.draw_mask(object_info, target.invisible_canvas);
                 // Don't draw on the test canvas now.
             }
@@ -732,14 +693,6 @@ XXXXX clean up events for forgotten objects
                     var info = method(s);
                     // store additional information added during draw operation
                     $.extend(s, info);
-                    // record raw drawing info if draw list is defined (moved to canvas_2d_widget_helper)
-                    //if (canvas.draw_list) {
-                    //    var draw_descriptor = $.extend({}, s);
-                    //    // don't return frame information
-                    //    draw_descriptor.frame = null;
-                    //    //canvas.draw_list.push($.extend({}, s));
-                    //    canvas.draw_list.push(draw_descriptor);
-                    //}
                 };
                 var object_info = target.store_object_info(opt, draw);
                 object_info.shape_name = shape_name;
@@ -854,19 +807,6 @@ XXXXX clean up events for forgotten objects
                 target.watch_event("mousemove");
             }
             // ??? no provision for cancelling events on the visible canvas?
-        };
-
-        target.generic_event_handler = function (e) {
-            // defer the event and request a redraw -- events are handled only after redraw
-            // one event per type for each event type.
-            var event_type = e.type;
-            if (target.event_info.event_types[event_type]) {
-                if (!target.deferred_type_to_event) {
-                    target.deferred_type_to_event = {};
-                }
-                target.deferred_type_to_event[event_type] = e;
-                target.request_redraw();
-            }
         };
 
         target.get_object_info = function(for_name_or_info) {
@@ -1026,7 +966,7 @@ XXXXX clean up events for forgotten objects
             return canvas_name;
         };
 
-        target.deferred_event_handler = function(e) {
+        target.generic_event_handler = function(e) {
             var visible = target.visible_canvas;
             // for testing allow test case to override pixel location.
             if (!e.pixel_location) {
