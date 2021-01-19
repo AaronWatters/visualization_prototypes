@@ -1,5 +1,17 @@
 var info = $('#info');
 
+
+const settings = {
+    color: "0xd4af37",
+    metalness: 0.8,
+    roughness: 0.0,
+    ambientIntensity: 1.0,
+    aoMapIntensity: 1.0,
+    envMapIntensity: 1.0,
+    displacementScale: 2.436143, // from original model
+    normalScale: 1.0
+};
+
 var setup = function () {
     debugger;
   info.html('setting up volume.');
@@ -127,7 +139,7 @@ function add_volume(element) {
             color: [1, 0, 0],
             rasterize: false,
             threshold: 0.6,
-            shrink_factor: 0.03,
+            shrink_factor: 0.06,
             dx: [1,0,0],
             dy: [0,1,0],
             dz: [0,0,1],
@@ -184,12 +196,12 @@ function add_volume(element) {
             }
             arm_vectors[i][1] = position;
             var radius = (MAX_OCTAVE - octave) / MAX_OCTAVE;
-            var radius1 = 0.1;
+            var radius1 = 0.15;
             var weight = 1;
             arm_vectors[i][2] = [radius, radius1, weight];
             count += 1;
         }
-        debugger;
+        //debugger;
         if (count > 0) {
             for (var j=0; j<3; j++) {
                 sum[j] = sum[j] * 1.0 / count;
@@ -211,6 +223,7 @@ function add_volume(element) {
         element.surface.check_update_link();
         element.surface.run()
         renderer.render(scene, camera);
+        //requestAnimationFrame( element.update_volume );
     };
 
     info.html('Isosurfaces initialized..');
@@ -262,8 +275,27 @@ function display_surface(element) {
     //renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild( renderer.domElement );
-    
+
     scene = new THREE.Scene();
+
+    // lights
+    const ambientLight = new THREE.AmbientLight( 0xffffff, settings.ambientIntensity );
+    //scene.add( ambientLight );
+
+    const pointLight = new THREE.PointLight( 0xff0000, 0.5 );
+    pointLight.position.z = 2500;
+    scene.add( pointLight );
+
+    const pointLight2 = new THREE.PointLight( 0xff6666, 1 );
+    pointLight2.position.y = - 1000;
+    pointLight2.position.x = 1000;
+    scene.add( pointLight2 );
+
+    const pointLight3 = new THREE.PointLight( 0x0000ff, 0.5 );
+    pointLight3.position.x = - 1000;
+    pointLight3.position.z = 1000;
+    scene.add( pointLight3 );
+
     element.scene = scene;
 
     scene.add( new THREE.AmbientLight( 0x444444 ) );
@@ -271,26 +303,55 @@ function display_surface(element) {
     camera = new THREE.PerspectiveCamera( 45, 1.0, 1, 10000 );
     // old: 0.4, 1.3
     camera.position.set( 0.7 * num_layers, 0.2 * num_layers, 1.1 * num_layers );
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    camera.lookAt(new THREE.Vector3(2, 0, 0));
     
     element.surface.run();
     geometry = element.surface.linked_three_geometry(THREE);
     geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(0,0,0), 1.0);
     // material
-    var material = new THREE.MeshNormalMaterial( {  } );
-    material.wireframe = false;
+    //var material = new THREE.MeshNormalMaterial( {  } );
 
-    // mesh
-    mesh = new THREE.Mesh( geometry,  material );
-    scene.add( mesh );
+    var on_texture_load = function() {
+        var color = 0xAAA9AD;
+        material = new THREE.MeshStandardMaterial( {
 
-    orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
-    //orbitControls.userZoom = false;
-    clock = new THREE.Clock();
+                color: color,
+                //color: 0x887744,
+                roughness: settings.roughness,
+                metalness: settings.metalness,
+                envMap: reflectionCube,
+                envMapIntensity: settings.envMapIntensity,
 
-    //update_scene();
-    positions = geometry.attributes.position.array;
-    renderer.render( scene, camera );
+                side: THREE.DoubleSide
+
+            } );
+        material.wireframe = false;
+
+        // mesh
+        mesh = new THREE.Mesh( geometry,  material );
+        scene.add( mesh );
+
+        orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+        //orbitControls.userZoom = false;
+        clock = new THREE.Clock();
+
+        //update_scene();
+        positions = geometry.attributes.position.array;
+        renderer.render( scene, camera );
+    };
+
+    // stuff for envmap
+    const path = "../textures/cube/pisa/";
+    const format = '.png';
+    const urls = [
+        path + 'px' + format, path + 'nx' + format,
+        path + 'py' + format, path + 'ny' + format,
+        path + 'pz' + format, path + 'nz' + format
+    ];
+
+    const reflectionCube = new THREE.CubeTextureLoader().load( urls, on_texture_load );
+    reflectionCube.encoding = THREE.sRGBEncoding;
+    
 };
 
 
