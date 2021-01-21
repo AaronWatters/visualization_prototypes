@@ -25,6 +25,8 @@ var setup = function () {
   piano_element.piano_keyboard({
     presses_callback: volume_element.presses_callback,
     reset_callback: volume_element.reset,
+    single_press_callback: volume_element.press,
+    single_unpress_callback: volume_element.unpress,
     add_spiral: false,
   });
   piano_element.piano.add_midi_url_button('./canon_simplified_for_piano.mid', "Pachelbel's Canon - simple arrangement for piano");
@@ -39,12 +41,17 @@ var setup = function () {
 };
 
 const MAX_NOTE = 12;
-const num_rows = 50;
-const num_cols = num_rows;
-const num_layers = 2 * num_rows;
+var num_rows = 50;
+var num_cols = num_rows;
+var num_layers = 2 * num_rows;
 
 function add_volume(element) {
     // add 3d spiral thing
+
+    // DEBUG
+    //num_rows = 3;
+    //num_cols = 3;
+    //num_layers = 12;
 
     element.feedbackContext = $.fn.feedWebGL2({});
 
@@ -52,6 +59,7 @@ function add_volume(element) {
         vertex_shader: musical_shader,
         feedbacks: {
             closeness: {num_components: 1},
+            //sampler_copy: {num_components: 1},  // debug
         },
     });
 
@@ -87,6 +95,12 @@ function add_volume(element) {
         var height = MAX_NOTE;
         element.texture.load_array(data, width, height);
     };
+
+    element.reload_arm_data = function () {
+        data = get_arm_array();
+        element.texture.reload_array(data);
+        element.feedbackContext.gl.flush();
+    }
 
     var load_test_vectors = function() {
         for (var i=0; i<TEST_VECTORS.length; i++) {
@@ -153,12 +167,20 @@ function add_volume(element) {
 
     element.current_presses = {};
 
+    element.press = function(note) {
+        element.presses_callback([{note}],[])
+    };
+    element.unpress = function(note) {
+        element.presses_callback([],[{note}])
+    };
+
     element.reset = function () {
         element.current_presses = {};
         element.presses_callback([], []);
     }
 
     element.presses_callback = function(presses, unpresses) {
+        //debugger;
         var next_presses = {};
         var unpressed = {};
         for (var i=0; i<unpresses.length; i++) {
@@ -175,7 +197,9 @@ function add_volume(element) {
             next_presses[name] = name;
         }
         element.current_presses = next_presses;
-        requestAnimationFrame( element.update_volume );
+        //element.reload_arm_data();
+        //requestAnimationFrame( element.update_volume );
+        element.update_volume();
     };
 
     element.update_volume = function () {
@@ -211,20 +235,28 @@ function add_volume(element) {
                 //arm_vectors[i][0] = [0,0,0];
             }
         }
-        // DEBUG
-        //load_test_vectors();
-        // emd debug
-        element.load_arm_data();
+        element.reload_arm_data();
+        // extra run???
+        element.runner.run();
+        requestAnimationFrame(element.run_all);
+    };
+
+    element.run_all = function () {
+        //debugger;
         element.runner.run();
         //var closeness = element.runner.feedback_array("closeness");
         var to_buffer_name = element.surface.crossing.buffer.name; // should encapsulate
         //to_buffer.copy_from_array(closeness);
+        // DEBUG
+        //element.sampler_copy = element.runner.feedback_array("sampler_copy");
+        //element.arm_array = get_arm_array(); // should be same in the beginning?
+        // END DEBUG
         element.runner.copy_feedback_to_buffer("closeness", to_buffer_name);
-        element.surface.check_update_link();
+        element.surface.link_needs_update = true;
         element.surface.run()
+        element.surface.check_update_link();
         renderer.render(scene, camera);
-        //requestAnimationFrame( element.update_volume );
-    };
+    }
 
     info.html('Isosurfaces initialized..');
 
@@ -303,7 +335,7 @@ function display_surface(element) {
     camera = new THREE.PerspectiveCamera( 45, 1.0, 1, 10000 );
     // old: 0.4, 1.3
     camera.position.set( 0.7 * num_layers, 0.2 * num_layers, 1.1 * num_layers );
-    camera.lookAt(new THREE.Vector3(2, 0, 0));
+    camera.lookAt(new THREE.Vector3(4, 0, 0));
     
     element.surface.run();
     geometry = element.surface.linked_three_geometry(THREE);
@@ -312,7 +344,7 @@ function display_surface(element) {
     //var material = new THREE.MeshNormalMaterial( {  } );
 
     var on_texture_load = function() {
-        var color = 0xAAA9AD;
+        var color = 0xD4AF37;
         material = new THREE.MeshStandardMaterial( {
 
                 color: color,
@@ -366,6 +398,9 @@ uniform float voxel_scale;
 uniform sampler2D ArmData;
 
 out float closeness;
+
+// DEBUGGING
+//out float sampler_copy;
 
 int divmod(in int numerator, in int denominator, out int remainder) {
     int result = numerator / denominator;
@@ -494,6 +529,15 @@ void main() {
     float nearness = 0.0;
     ivec2 sampler_size = textureSize(ArmData, 0);
     int num_arms = sampler_size[1];
+    // DEBUGGING -- dump the current sampler
+    //sampler_copy = 0.0;
+    //int sampler_i, sampler_j, sampler_k, sampler_rem;
+    //sampler_i = divmod(gl_VertexID, 9, sampler_rem);
+    //sampler_j = divmod(sampler_rem, 3, sampler_k);
+    //if (sampler_i < num_arms) {
+    //    sampler_copy = texelFetch(ArmData, ivec2(sampler_j, sampler_i), 0).rgb[sampler_k];
+    //}
+    // END DEBUGGING
     for (int i=0; i<num_arms; i++) {
         vec3 P2 = texelFetch(ArmData, ivec2(0, i), 0).rgb;
         vec3 P1 = texelFetch(ArmData, ivec2(1, i), 0).rgb;

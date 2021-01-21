@@ -35,6 +35,8 @@ requires jp_doodle, tone, and midi
           background: '#666',
           info_background: '#ee9',
           presses_callback: null,
+          single_press_callback: null,
+          single_unpress_callback: null,
           reset_callback: null,
           add_spiral: true,
           draw_mid: true,
@@ -372,10 +374,16 @@ requires jp_doodle, tone, and midi
       if (!this.silent) {
         this.piano.triggerAttack(name);
       }
+      if ((!this.disable_key_draw) && (this.settings.single_press_callback)) {
+          this.settings.single_press_callback(name);
+      }
     }
     unpress_note(name) {
       if (!this.silent) {
         this.piano.triggerRelease(name);
+      }
+      if ((!this.disable_key_draw) && (this.settings.single_press_callback)) {
+          this.settings.single_unpress_callback(name);
       }
     }
   }
