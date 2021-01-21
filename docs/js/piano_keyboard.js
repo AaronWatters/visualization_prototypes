@@ -191,6 +191,8 @@ requires jp_doodle, tone, and midi
       this.playing = false;
       this.synths = [];
       this.events = [];
+      // reset midi play settings
+      this.play_midi(true);
     }
     add_midi_url_button(url, title) {
       title = title || url;
@@ -205,25 +207,33 @@ requires jp_doodle, tone, and midi
       };
       url_button.click(url_click);
     }
-    play_midi() {
+    play_midi(playing) {
+      debugger;
+      playing = playing || this.playing;
       var that = this;
       this.disable_key_draw = false;
       var s = this.settings;
-      if (s.reset_callback) {
-          s.reset_callback();
+
+      // clear keyboard
+      for (var name in this.name_to_keys) {
+        var key = this.name_to_keys[name];
+        key.do_unpress();
       }
+      //if (s.reset_callback) {
+      //    s.reset_callback();
+      //}
       const midi_json = this.midi_json;
       //var synths = this.midi_synths;
-      if (this.playing) {
+      if (playing) {
         // reset
         this.synths.forEach(function (synth) {
           synth.disconnect();
         });
         // clear keyboard
-        for (var name in this.name_to_keys) {
-          var key = this.name_to_keys[name];
-          key.do_unpress();
-        }
+        //for (var name in this.name_to_keys) {
+        //  var key = this.name_to_keys[name];
+        //  key.do_unpress();
+        //}
         // clear graphics
         //   xxx should do this using a frame reset/redraw? or use event object?
         var old_events = this.events;
@@ -240,6 +250,9 @@ requires jp_doodle, tone, and midi
         this.synths = [];
         this.events = [];
         this.playing = false;
+        if (s.reset_callback) {
+            s.reset_callback(!this.playing);
+        }
         this.silent = false;
         this.play_midi_button.html('Play midi');
       } else {
@@ -247,8 +260,12 @@ requires jp_doodle, tone, and midi
         this.disable_key_draw = true;
         this.silent = true;
         this.playing = true;
+        if (s.reset_callback) {
+            s.reset_callback(!this.playing);
+        }
         this.events = [];
-        var now = Tone.now();
+        var delay = 1.0;   // delay all notes...
+        var now = Tone.now() + delay;
         midi_json.tracks.forEach(function (track) {
           const synth = new Tone.PolySynth(Tone.Synth, {
             envelope: {

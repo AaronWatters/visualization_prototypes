@@ -33,7 +33,8 @@ var setup = function () {
   piano_element.piano.add_midi_url_button('./Bach-Jesu_Joy_of_Man_Desiring.mid', "Bach: Jesu Joy of Man's Desiring");
   piano_element.piano.add_midi_url_button('./beethoven_opus10_1_format0.mid', 'Beethoven: Opus 10');
   piano_element.piano.add_midi_url_button('./handel_hallelujah.mid', 'Handel: Hallelujah Chorus');
-  piano_element.piano.add_midi_url_button('./Take-Five-1.mid', 'Take five');
+  //piano_element.piano.add_midi_url_button('./Take-Five-1.mid', 'Take five');
+  piano_element.piano.add_midi_url_button('./snoopy.mid', 'Snoopy - Vince Guaraldi');
   piano_element.piano.add_midi_url_button(
       './Coltrane_giant_steps.mid', 
       "John Coltrane - Giant Steps");
@@ -174,9 +175,29 @@ function add_volume(element) {
         element.presses_callback([],[{note}])
     };
 
-    element.reset = function () {
+    element.is_rotating = false;
+
+    element.reset = function (rotate) {
         element.current_presses = {};
         element.presses_callback([], []);
+        if (rotate) {
+            if (element.is_rotating) {
+                // do nothing... keep rotating.
+            } else {
+                var do_rotate = function () {
+                    var delta = clock.getDelta();
+                    orbitControls.update(delta);
+                    renderer.render( scene, camera );
+                    if (element.is_rotating) {
+                        requestAnimationFrame(do_rotate);
+                    }
+                };
+                element.is_rotating = true;
+                requestAnimationFrame(do_rotate);
+            }
+        } else {
+            element.is_rotating = false;
+        }
     }
 
     element.presses_callback = function(presses, unpresses) {
@@ -220,7 +241,7 @@ function add_volume(element) {
             }
             arm_vectors[i][1] = position;
             var radius = (MAX_OCTAVE - octave) / MAX_OCTAVE;
-            var radius1 = 0.15;
+            var radius1 = 0.1;
             var weight = 1;
             arm_vectors[i][2] = [radius, radius1, weight];
             count += 1;
@@ -237,7 +258,7 @@ function add_volume(element) {
         }
         element.reload_arm_data();
         // extra run???
-        element.runner.run();
+        //element.runner.run();
         requestAnimationFrame(element.run_all);
     };
 
@@ -303,7 +324,9 @@ function display_surface(element) {
     renderer = new THREE.WebGLRenderer( { canvas: canvas, context: context } );
     //renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( 1500,611 );
+    var width = 1500;
+    var height = 611;
+    renderer.setSize( width, height );
     //renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild( renderer.domElement );
@@ -332,10 +355,11 @@ function display_surface(element) {
 
     scene.add( new THREE.AmbientLight( 0x444444 ) );
 
-    camera = new THREE.PerspectiveCamera( 45, 1.0, 1, 10000 );
+    camera = new THREE.PerspectiveCamera( 45, width / height, 1, 10000 );
     // old: 0.4, 1.3
-    camera.position.set( 0.7 * num_layers, 0.2 * num_layers, 1.1 * num_layers );
-    camera.lookAt(new THREE.Vector3(4, 0, 0));
+    //camera.position.set( 0.3 * num_layers, 0.2 * num_layers, 0.5 * num_layers );
+    camera.position.set( 0.0, 0.2 * num_layers, 0.5 * num_layers );
+    //camera.lookAt(new THREE.Vector3(0.5 * num_layers, 0, 0));
     
     element.surface.run();
     geometry = element.surface.linked_three_geometry(THREE);
@@ -363,14 +387,16 @@ function display_surface(element) {
         mesh = new THREE.Mesh( geometry,  material );
         scene.add( mesh );
 
-        orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
-        //orbitControls.userZoom = false;
-        clock = new THREE.Clock();
-
         //update_scene();
         positions = geometry.attributes.position.array;
         renderer.render( scene, camera );
     };
+
+    orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+    orbitControls.target = new THREE.Vector3(0.5 * num_layers, 0, 0);
+    orbitControls.update();
+    //orbitControls.userZoom = false;
+    clock = new THREE.Clock();
 
     // stuff for envmap
     const path = "../textures/cube/pisa/";
