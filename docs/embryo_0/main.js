@@ -67,21 +67,34 @@ function process_data(json, element) {
         nd_frame.reset();
         for (var i=0; i<current_dicts.length; i++) {
             var d = current_dicts[i];
-            intensities = d.intensities;
-            coords = d.coord;
+            var intensities = d.intensities;
+            var coords = [...d.coord];
             nd_frame.circle({location: coords, r:5 , color:"rgba(200,200,200, 0.3)"});
+            var cum = 0.0;
+            var descs = []
+            var radius_scale = 6;
             for (var j=0; j<intensities.length; j++) {
                 var [intensity, gene] = intensities[j];
-                nd_frame.circle({location:coords, r:intensity*10, color:gene_color[gene]})
+                cum += intensity;
+                var sqrtcum = Math.sqrt(cum);
+                //nd_frame.circle({location:coords, r:sqrtcum*10, color:gene_color[gene]})
+                var desc = {location:coords, r:radius_scale*sqrtcum, color:gene_color[gene]};
+                descs.push(desc);
+            }
+            while (descs.length > 0) {
+                // modify shared reference
+                coords[2] += 0.1;
+                var desc = descs.pop();
+                nd_frame.circle(desc);
             }
         }
         var center = [100,100,100];
         var radius = 300;
         nd_frame.orbit_all(radius, center);
-        info.html("Please slide the slider or rotate the view.")
     }
     
     draw_current(current_dicts);
+    info.html("Please slide the slider or rotate the view.")
     
     nd_frame.fit(0.8);
 };
