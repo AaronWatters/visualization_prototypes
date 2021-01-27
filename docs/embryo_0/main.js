@@ -185,6 +185,13 @@ function process_data(json, element) {
         }
         target.on_canvas_event("mouseout", function(event) {
             tooltip.css({opacity: 0});
+            // move the tooltip off the canvas
+            var vc = target.visible_canvas;
+            var element_offset = vc.offset();
+            tooltip.offset({
+                left: element_offset.left + vc.width(),
+                top: element_offset.top,
+            });
         })
     };
 
