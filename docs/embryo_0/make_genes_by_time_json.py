@@ -26,7 +26,7 @@ def main():
     else:
         print(txt)
     
-def converted_json(json_input):
+def converted_json(json_input, as_string=True):
     import json
     data = json.loads(json_input)
     dicts = {}
@@ -54,7 +54,10 @@ def converted_json(json_input):
     times = sorted(dicts[0]["time_info"][0] for dicts in time_to_dicts.values())
     times = [str(t) for t in times]
     data_out = dict(time_to_dicts=time_to_dicts, gene_names=gene_names, times=times)
-    return json.dumps(data_out)
+    if as_string:
+        return json.dumps(data_out)
+    else:
+        return data_out
 
 if __name__ == "__main__":
     main()
