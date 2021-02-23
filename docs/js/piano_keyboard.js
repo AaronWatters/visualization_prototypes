@@ -67,67 +67,10 @@ requires jp_doodle, tone, and midi
         height: canvas_height,
       });
       this.name_to_keys = {};
+      // optionally add keyboard
       if (s.add_keyboard) {
           this.add_keyboard_canvas(background_width, background_height);
       }
-      /*
-      // draw background rectangle
-      this.background = this.canvas.rect({
-        x: -s.margin,
-        y: -s.margin,
-        w: background_width,
-        h: background_height,
-        color: s.background,
-        name: true,
-      });
-      // draw white keys
-      var name_to_keys = {};
-      var current_x = 0;
-      for (var octave = s.low_octave; octave < s.high_octave; octave++) {
-        for (var notei = 0; notei < note_names.length; notei++) {
-          var note_name = note_names[notei] + ('' + octave);
-          var key = new PianoKey({
-            on_frame: this.canvas,
-            w: s.key_width,
-            h: s.white_height,
-            x: current_x,
-            y: 0,
-            note_name: note_name,
-            off_color: s.white_key_normal,
-            on_color: s.white_key_pressed,
-            player: this,
-          });
-          name_to_keys[note_name] = key;
-          current_x += s.key_width;
-        }
-      }
-      // draw black keys
-      current_x = 0;
-      var black_y = s.white_height - s.black_height;
-      var black_x_offset = s.key_width * 0.75;
-      var black_width = s.key_width * 0.5;
-      for (var octave = s.low_octave; octave < s.high_octave; octave++) {
-        for (var notei = 0; notei < note_names.length; notei++) {
-          var note = note_names[notei];
-          if (sharpable[note]) {
-            var note_name = note + ('#' + octave);
-            var key = new PianoKey({
-              on_frame: this.canvas,
-              w: black_width,
-              h: s.black_height,
-              x: current_x + black_x_offset,
-              y: black_y,
-              note_name: note_name,
-              off_color: s.black_key_normal,
-              on_color: s.black_key_pressed,
-              player: this,
-            });
-            name_to_keys[note_name] = key;
-          }
-          current_x += s.key_width;
-        }
-      }
-      */
       // optionally add spiral
       if (s.add_spiral) {
         var spiral = new SingleSpiral(this.canvas, {
@@ -146,24 +89,16 @@ requires jp_doodle, tone, and midi
       }
       //this.name_to_keys = name_to_keys;
       this.canvas.fit();
-      this.file_drop_div = $('<div>Choose midi file</div>').appendTo(element);
-      //this.file_drop_div.css({
-      //height: "50px",
-      //width: background_width+"px",
-      //text_align: "center",
-      //border: "2px dashed black",
-      //"background-color": "#ffe",
-      //});
-      this.file_drop_input = $('<input type="file" accept="audio/midi" />').appendTo(this.file_drop_div);
+      this.midi_info_div = $("<div>Midi info here</div>").appendTo(element);
+      this.show_midi_info();
       this.play_button_div = $('<div/>').appendTo(this.element);
-      this.play_midi_button = $('<button>Play midi</button>ß').appendTo(this.play_button_div);
+      this.play_midi_button = $('<button>Play midi</button>').appendTo(this.play_button_div);
       this.play_midi_button.on('click', function () {
         that.play_midi();
       });
-      //this.play_button_div.css({
-      //    visibility: "hidden",
-      //});
       this.play_button_div.hide();
+      this.file_drop_div = $('<div>Choose midi file</div>').appendTo(element);
+      this.file_drop_input = $('<input type="file" accept="audio/midi" />').appendTo(this.file_drop_div);
       if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
         this.file_drop_div.html("THIS BROWSER DOESN'T SUPPORT FILE PROCESSING.");
       } else {
@@ -261,6 +196,30 @@ requires jp_doodle, tone, and midi
       }
       this.name_to_keys = name_to_keys;
     };
+    show_midi_info() {
+        var that = this;
+        var div = this.midi_info_div;
+        var info = this.midi_json;
+        if (info) {
+            // display info
+            div.empty();
+            $("<div> Midi name: " + info.header.name + "</div>").appendTo(div);
+            var tracks_div = $("<div/>").appendTo(div);
+            tracks_div.css({
+                display: "grid",
+                "grid-template-columns": "auto auto auto",
+                "background-color": "#fee",
+            });
+            var tracks = this.synths;
+            tracks.forEach(function(track) {
+                track.add_divs(tracks_div);
+            });
+        } else {
+            // no info
+            div.empty();
+            div.html("No midi data yet loaded.")
+        }
+    };
     add_midi_url_button(url, title) {
       title = title || url;
       var that = this;
@@ -287,29 +246,8 @@ requires jp_doodle, tone, and midi
       }
       const midi_json = this.midi_json;
       if (playing) {
-        // reset
-        this.synths.forEach(function (synth) {
-          synth.dispose();
-        });
-        var old_events = this.events;
-        for (var i=0; i<old_events.length; i++) {
-            var old_event = old_events[i];
-            if (old_event.type == "unpress") {
-                var annotations = old_event.press.annotations;
-                for (var j = 0; j < annotations.length; j++) {
-                  var annotationj = annotations[j];
-                  annotationj.forget();
-                }
-            }
-        }
-        this.synths = [];
-        this.events = [];
-        this.playing = false;
-        if (s.reset_callback) {
-            s.reset_callback(!this.playing);
-        }
-        this.silent = false;
-        this.play_midi_button.html('Play midi');
+          // reset.
+          that.set_up_midi_json();
       } else {
         this.play_midi_button.html('Reset midi');
         this.disable_key_draw = true;
@@ -318,16 +256,9 @@ requires jp_doodle, tone, and midi
         if (s.reset_callback) {
             s.reset_callback(!this.playing);
         }
-        this.events = [];
-        var delay = 1.0;   // delay all notes...
-        var now = Tone.now() + delay;
-        midi_json.tracks.forEach(function (track) {
-            const synth = new MidiTrack(track, that);
-            that.synths.push(synth);
-            // for now set instrument and load immediately
-            //synth.add_events(that.events);
-            synth.set_instrument("piano");
-            //synth.set_instrument("saxophone");
+        // setting instruments will automatically trigger check_events when all callbacks are resolved.
+        this.synths.forEach(function (track) {
+            track.set_instrument();
         });
       }
       this.event_loop_active = false;
@@ -362,7 +293,6 @@ requires jp_doodle, tone, and midi
         }
     };
     check_events() {
-        debugger;
       var that = this;
       var now = Tone.now();
       var events = this.events;
@@ -414,8 +344,9 @@ requires jp_doodle, tone, and midi
         that.info.html('midi parsed: ' + file.name);
         that.midi_json = midi;
         //that.play_button_div.css("visibility", "visible");
-        that.play_button_div.show();
-        that.play_midi();
+        //that.play_button_div.show();
+        //that.play_midi();
+        that.set_up_midi_json();
       };
       that.info.html('reading file ' + file.name);
       reader.readAsArrayBuffer(file);
@@ -434,11 +365,46 @@ requires jp_doodle, tone, and midi
           const midi = new Midi(byteArray);
           that.info.html('midi parsed: ' + url);
           that.midi_json = midi;
-          that.play_button_div.show();
-          that.play_midi();
+          //that.play_button_div.show();
+          //that.play_midi();
+          that.set_up_midi_json();
         }
       };
       oReq.send(null);
+    };
+    set_up_midi_json() {
+        var that = this;
+        if (that.midi_json) {
+            this.play_midi_button.html('Play midi');
+            that.play_button_div.show();
+            this.playing = false;
+            //var playing = this.playing;
+            // clear existing synths
+            if (that.synths) {
+                that.synths.forEach(function (synth) {
+                    synth.dispose();
+                });
+            }
+            that.synths = [];
+            // clear annotations
+            if (that.events) {
+                that.events.forEach(function (event) {
+                    if ((event.press) && (event.press.annotations)) {
+                        event.press.annotations.forEach(function(annotation) {
+                            annotation.forget();
+                        })
+                    }
+                })
+            }
+            that.events = [];
+            // set up tracks
+            const midi_json = that.midi_json;
+            midi_json.tracks.forEach(function (track) {
+                const synth = new MidiTrack(track, that);
+                that.synths.push(synth);
+            });
+        }
+        this.show_midi_info();
     };
     press_note(name) {
       if (!this.silent) {
@@ -462,18 +428,26 @@ requires jp_doodle, tone, and midi
       constructor(track, player) {
           this.player = player;
           this.track = track;
-          this.name = track.name;
-          this.family = track.family;
+          this.name = track.instrument.name;
+          this.family = track.instrument.family;
           this.instrument_ready = false;
           this.instrument = null;
           this.active = true;
+          this.disable = "(disable)";
       };
       set_instrument(instrument_name) {
             var that = this;
-            this.instrument = SampleLibrary.load({
-                instruments: instrument_name,
-                onload: function() { that.onload(); },
-                });
+            if (!instrument_name) {
+                instrument_name = this.select.find(":selected").text();
+            }
+            if (instrument_name == this.disable) {
+                this.active = false;
+            } else {
+                this.instrument = SampleLibrary.load({
+                    instruments: instrument_name,
+                    onload: function() { that.onload(); },
+                    });
+            }
       };
       onload() {
           this.instrument_ready = true;
@@ -510,6 +484,27 @@ requires jp_doodle, tone, and midi
             };
             event_list.push(unpress);
           });
+      };
+      add_divs(container) {
+          debugger;
+        var namediv = $("<div/>").appendTo(container);
+        var familydiv = $("<div/>").appendTo(container);
+        var optionsdiv = $("<div/>").appendTo(container);
+        namediv.html("" + this.name);
+        familydiv.html("" + this.family);
+        //optionsdiv.html("options...");
+        var select = $("<select/>").appendTo(optionsdiv);
+        var selected = "piano";
+        SampleLibrary.list.forEach(function(instrument_name) {
+            if (selected == instrument_name) {
+                $("<option selected>" + instrument_name + "</option>").appendTo(select);
+            } else {
+                $("<option>" + instrument_name + "</option>").appendTo(select);
+            }
+            //selected = false;
+        });
+        $("<option>" + this.disable + "</option>").appendTo(select);
+        this.select = select;
       };
       dispose() {
           if (this.instrument) {
