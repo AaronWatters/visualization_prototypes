@@ -39,6 +39,7 @@ requires jp_doodle, tone, and midi
           single_unpress_callback: null,
           reset_callback: null,
           add_spiral: true,
+          add_keyboard: true,
           draw_mid: true,
         },
         options
@@ -65,6 +66,11 @@ requires jp_doodle, tone, and midi
         width: background_width,
         height: canvas_height,
       });
+      this.name_to_keys = {};
+      if (s.add_keyboard) {
+          this.add_keyboard_canvas(background_width, background_height);
+      }
+      /*
       // draw background rectangle
       this.background = this.canvas.rect({
         x: -s.margin,
@@ -121,6 +127,7 @@ requires jp_doodle, tone, and midi
           current_x += s.key_width;
         }
       }
+      */
       // optionally add spiral
       if (s.add_spiral) {
         var spiral = new SingleSpiral(this.canvas, {
@@ -137,7 +144,7 @@ requires jp_doodle, tone, and midi
           spiral.display_notes(presses, unpresses);
         };
       }
-      this.name_to_keys = name_to_keys;
+      //this.name_to_keys = name_to_keys;
       this.canvas.fit();
       this.file_drop_div = $('<div>Choose midi file</div>').appendTo(element);
       //this.file_drop_div.css({
@@ -194,6 +201,66 @@ requires jp_doodle, tone, and midi
       // reset midi play settings
       this.play_midi(true);
     }
+    add_keyboard_canvas(background_width, background_height) {
+      // draw background rectangle
+      var s = this.settings;
+      this.background = this.canvas.rect({
+        x: -s.margin,
+        y: -s.margin,
+        w: background_width,
+        h: background_height,
+        color: s.background,
+        name: true,
+      });
+      // draw white keys
+      var name_to_keys = {};
+      var current_x = 0;
+      for (var octave = s.low_octave; octave < s.high_octave; octave++) {
+        for (var notei = 0; notei < note_names.length; notei++) {
+          var note_name = note_names[notei] + ('' + octave);
+          var key = new PianoKey({
+            on_frame: this.canvas,
+            w: s.key_width,
+            h: s.white_height,
+            x: current_x,
+            y: 0,
+            note_name: note_name,
+            off_color: s.white_key_normal,
+            on_color: s.white_key_pressed,
+            player: this,
+          });
+          name_to_keys[note_name] = key;
+          current_x += s.key_width;
+        }
+      }
+      // draw black keys
+      current_x = 0;
+      var black_y = s.white_height - s.black_height;
+      var black_x_offset = s.key_width * 0.75;
+      var black_width = s.key_width * 0.5;
+      for (var octave = s.low_octave; octave < s.high_octave; octave++) {
+        for (var notei = 0; notei < note_names.length; notei++) {
+          var note = note_names[notei];
+          if (sharpable[note]) {
+            var note_name = note + ('#' + octave);
+            var key = new PianoKey({
+              on_frame: this.canvas,
+              w: black_width,
+              h: s.black_height,
+              x: current_x + black_x_offset,
+              y: black_y,
+              note_name: note_name,
+              off_color: s.black_key_normal,
+              on_color: s.black_key_pressed,
+              player: this,
+            });
+            name_to_keys[note_name] = key;
+          }
+          current_x += s.key_width;
+        }
+      }
+      this.name_to_keys = name_to_keys;
+    };
     add_midi_url_button(url, title) {
       title = title || url;
       var that = this;
