@@ -208,7 +208,6 @@ requires jp_doodle, tone, and midi
       url_button.click(url_click);
     }
     play_midi(playing) {
-      debugger;
       playing = playing || this.playing;
       var that = this;
       this.disable_key_draw = false;
@@ -219,23 +218,12 @@ requires jp_doodle, tone, and midi
         var key = this.name_to_keys[name];
         key.do_unpress();
       }
-      //if (s.reset_callback) {
-      //    s.reset_callback();
-      //}
       const midi_json = this.midi_json;
-      //var synths = this.midi_synths;
       if (playing) {
         // reset
         this.synths.forEach(function (synth) {
-          synth.disconnect();
+          synth.dispose();
         });
-        // clear keyboard
-        //for (var name in this.name_to_keys) {
-        //  var key = this.name_to_keys[name];
-        //  key.do_unpress();
-        //}
-        // clear graphics
-        //   xxx should do this using a frame reset/redraw? or use event object?
         var old_events = this.events;
         for (var i=0; i<old_events.length; i++) {
             var old_event = old_events[i];
@@ -267,54 +255,47 @@ requires jp_doodle, tone, and midi
         var delay = 1.0;   // delay all notes...
         var now = Tone.now() + delay;
         midi_json.tracks.forEach(function (track) {
-          const synth = new Tone.PolySynth(Tone.Synth, {
-            envelope: {
-              attack: 0.02,
-              decay: 0.1,
-              sustain: 0.3,
-              release: 1,
-            },
-          }).toDestination();
-          that.synths.push(synth);
-          //schedule all of the events
-          track.notes.forEach((note) => {
-            //synth.triggerAttackRelease(
-            //    note.name,
-            //    note.duration,
-            //    note.time + now,
-            //    note.velocity
-            //);
-            var press = {
-              type: 'press',
-              note: note.name,
-              time: note.time + now,
-              duration: note.duration,
-              velocity: note.velocity,
-              synth: synth,
-              midi: note.midi,
-              annotations: [],
-            };
-            that.events.push(press);
-            var unpress = {
-              type: 'unpress',
-              note: note.name,
-              time: note.time + note.duration + now,
-              velocity: note.velocity,
-              synth: synth,
-              press: press,
-            };
-            that.events.push(unpress);
-          });
+            const synth = new MidiTrack(track, that);
+            that.synths.push(synth);
+            // for now set instrument and load immediately
+            //synth.add_events(that.events);
+            synth.set_instrument("piano");
+            //synth.set_instrument("saxophone");
         });
-        // sort the events
-        this.events.sort(function (a, b) {
-          return a.time - b.time;
-        });
-        this.event_index = 0;
-        this.check_events();
       }
-    }
+      this.event_loop_active = false;
+    };
+    check_instruments() {
+        if (this.event_loop_active) {
+            return;
+        }
+        var ready = true;
+        this.synths.forEach(function(synth) {
+            ready = ready && synth.ready();
+        });
+        if (ready) {
+            var events = [];
+            var now = Tone.now() + 1;
+            this.synths.forEach(function(synth) {
+                synth.add_events(events, now);
+            });
+            // sort the events
+            events.sort(function (a, b) {
+              return a.time - b.time;
+            });
+            this.events = events;
+            this.event_index = 0;
+            this.event_loop_active = true;
+            try {
+                Tone.start();
+            } catch (e) {
+                console.log("Failed to (re)start Tone.");
+            }
+            this.check_events();
+        }
+    };
     check_events() {
+        debugger;
       var that = this;
       var now = Tone.now();
       var events = this.events;
@@ -326,7 +307,10 @@ requires jp_doodle, tone, and midi
         var key = this.name_to_keys[event.note];
         if (event.type == 'press') {
           presses.push(event);
-          event.synth.triggerAttack(event.note, event.velocity);
+          debugger;
+          //event.synth.triggerAttack(event.note, event.velocity);
+          // xxxx velocity doesn't work???
+          event.synth.triggerAttack(event.note);
           //this.info.html('press ' + event.note);
           if (key) {
             key.do_press();
@@ -347,6 +331,8 @@ requires jp_doodle, tone, and midi
         requestAnimationFrame(function () {
           that.check_events();
         });
+      } else {
+          that.event_loop_active = false;
       }
       if (this.settings.presses_callback) {
         this.settings.presses_callback(presses, unpresses);
@@ -386,7 +372,7 @@ requires jp_doodle, tone, and midi
         }
       };
       oReq.send(null);
-    }
+    };
     press_note(name) {
       if (!this.silent) {
         this.piano.triggerAttack(name);
@@ -402,12 +388,72 @@ requires jp_doodle, tone, and midi
       if ((!this.disable_key_draw) && (this.settings.single_press_callback)) {
           this.settings.single_unpress_callback(name);
       }
-    }
+    };
   }
+
+  class MidiTrack {
+      constructor(track, player) {
+          this.player = player;
+          this.track = track;
+          this.name = track.name;
+          this.family = track.family;
+          this.instrument_ready = false;
+          this.instrument = null;
+          this.active = true;
+      };
+      set_instrument(instrument_name) {
+            var that = this;
+            this.instrument = SampleLibrary.load({
+                instruments: instrument_name,
+                onload: function() { that.onload(); },
+                });
+      };
+      onload() {
+          this.instrument_ready = true;
+          this.instrument.toDestination();
+          this.player.check_instruments();
+      };
+      ready() {
+          return (!this.active) || this.instrument_ready;
+      }
+      add_events(event_list, now) {
+          if (!this.active) {
+              return;
+          }
+          var synth = this.instrument;
+          this.track.notes.forEach((note) => {
+            var press = {
+              type: 'press',
+              note: note.name,
+              time: note.time + now,
+              duration: note.duration,
+              velocity: note.velocity,
+              synth: synth,
+              midi: note.midi,
+              annotations: [],
+            };
+            event_list.push(press);
+            var unpress = {
+              type: 'unpress',
+              note: note.name,
+              time: note.time + note.duration + now,
+              velocity: note.velocity,
+              synth: synth,
+              press: press,
+            };
+            event_list.push(unpress);
+          });
+      };
+      dispose() {
+          if (this.instrument) {
+              this.instrument.disconnect();
+              this.instrument.dispose();
+          }
+      }
+  };
 
   class SingleSpiral {
     constructor(canvas, options) {
-      debugger;
       var s = $.extend(
         {
           x: 0,
