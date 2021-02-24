@@ -94,9 +94,9 @@ requires jp_doodle, tone, and midi
       }
       //this.name_to_keys = name_to_keys;
       this.canvas.fit(null, s.fit_margin);
+      this.play_button_div = $('<div/>').appendTo(this.element);
       this.midi_info_div = $("<div>Midi info here</div>").appendTo(element);
       this.show_midi_info();
-      this.play_button_div = $('<div/>').appendTo(this.element);
       this.play_midi_button = $('<button>Play midi</button>').appendTo(this.play_button_div);
       this.play_midi_button.on('click', function () {
         that.play_midi();
