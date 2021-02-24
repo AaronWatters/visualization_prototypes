@@ -112,6 +112,7 @@ class Double_Helix {
             max_radius: 150,
             spiral_width: 3,
             graphic_width: 5,
+            central_radius: 40,
           },
           options
         );
@@ -164,7 +165,7 @@ class Double_Helix {
             color: s.spiral_colors[1],
             lineWidth: s.spiral_width,
         });
-        this.center_circle = this.frame.circle({x:0, y:0, r:0, lineWidth:0, color:s.tone_start_color, name:true});
+        this.center_circle = this.frame.circle({x:0, y:0, r:0, color:s.tone_start_color, name:true});
         this.center_tone_xy = [0, 0];
         this.note_graphics = [];
     };
@@ -189,12 +190,13 @@ class Double_Helix {
         return result;
     };
     reset() {
-        debugger;
         this.note_graphics.forEach(function(ng) {
             ng.hide();
         });
+        this.center_circle.change({r: 0, x:0, y:0});
     }
     display_notes(presses, unpresses) {
+        var s = this.settings;
         // inactivate all unpresses
         for (var i=0; i<unpresses.length; i++) {
             var press = unpresses[i].press;
@@ -247,9 +249,16 @@ class Double_Helix {
         }
         this.center_tone_xy = [new_cx, new_cy];
         // update press graphics
+        var min_duration = 10;
         for (var i=0; i<presses.length; i++) {
             var press = presses[i];
-            press.graphics.change(new_cx, new_cy, press.duration);
+            var duration =  press.duration;
+            min_duration = Math.min(min_duration, duration);
+            press.graphics.change(new_cx, new_cy, duration);
+        }
+        if (presses.length) {
+            //debugger;
+            this.center_circle.transition({r: s.central_radius, x:new_cx, y:new_cy}, min_duration * 0.4);
         }
     };
     spiral_position_2d(offset, spiral) {
@@ -290,9 +299,10 @@ class NoteGraphic {
         var s = this.in_helix.settings;
         var [x1, y1] = this.position;
         this.circle.change({lineWidth: s.graphic_width, x: x1, y: y1, r:s.max_radius});
-        this.line.change({lineWidth: s.graphic_width});
+        //this.line.change({lineWidth: s.graphic_width});
         this.circle.transition({r: 0, lineWidth: 0}, duration);
-        this.line.transition({x1: x1, y1: y1, x2: cx, y2: cy}, duration * 0.5)
+        this.line.change({x1: x1, y1: y1, x2: cx, y2: cy, lineWidth: s.graphic_width});
+        this.line.transition({lineWidth: 0, x2:x1, y2:y1}, duration);
         this.active = true;
     }
 };
