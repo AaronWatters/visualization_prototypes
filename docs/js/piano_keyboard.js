@@ -239,6 +239,9 @@ requires jp_doodle, tone, and midi
       this.disable_key_draw = false;
       var s = this.settings;
 
+      if (s.reset_callback) {
+        s.reset_callback(playing);
+      }
       // clear keyboard
       for (var name in this.name_to_keys) {
         var key = this.name_to_keys[name];
@@ -253,9 +256,9 @@ requires jp_doodle, tone, and midi
         this.disable_key_draw = true;
         this.silent = true;
         this.playing = true;
-        if (s.reset_callback) {
-            s.reset_callback(!this.playing);
-        }
+        //if (s.reset_callback) {
+        //    s.reset_callback(!this.playing);
+        //}
         // setting instruments will automatically trigger check_events when all callbacks are resolved.
         this.synths.forEach(function (track) {
             track.set_instrument();

@@ -14,6 +14,8 @@ const settings = {
 
 var setup = function () {
     debugger;
+    info.html("Set up SampleLibrary.")
+    SampleLibrary.baseUrl = "https://nbrosowsky.github.io/tonejs-instruments/samples/";
   info.html('setting up volume.');
   var element = $('#piano');
   element.empty();
