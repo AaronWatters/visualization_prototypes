@@ -39,8 +39,11 @@ requires jp_doodle, tone, and midi
           single_unpress_callback: null,
           reset_callback: null,
           add_spiral: true,
+          spiral_implementation: null,
+          spiral_height: null,
           add_keyboard: true,
           draw_mid: true,
+          fit_margin: 1,
         },
         options
       );
@@ -57,7 +60,7 @@ requires jp_doodle, tone, and midi
       var background_height = s.white_height + 2 * s.margin;
       var canvas_height = background_height;
       if (s.add_spiral) {
-        canvas_height = 2 * background_height;
+        canvas_height = s.spiral_height || 2 * background_height;
       }
       // create the canvas
       element.empty();
@@ -73,22 +76,24 @@ requires jp_doodle, tone, and midi
       }
       // optionally add spiral
       if (s.add_spiral) {
-        var spiral = new SingleSpiral(this.canvas, {
+        var spiral_implementation = s.spiral_implementation || SingleSpiral;
+        var spiral = new spiral_implementation(this.canvas, {
           x: 0,
           y: background_height,
           width: background_width,
           height: background_height,
+          canvas_height: canvas_height,
           low_octave: s.low_octave,
           high_octave: s.high_octave,
           keyboard: this,
         });
-        this.single_spiral = spiral;
+        this.spiral = spiral;
         s.presses_callback = function (presses, unpresses) {
           spiral.display_notes(presses, unpresses);
         };
       }
       //this.name_to_keys = name_to_keys;
-      this.canvas.fit();
+      this.canvas.fit(null, s.fit_margin);
       this.midi_info_div = $("<div>Midi info here</div>").appendTo(element);
       this.show_midi_info();
       this.play_button_div = $('<div/>').appendTo(this.element);
@@ -307,7 +312,6 @@ requires jp_doodle, tone, and midi
         var key = this.name_to_keys[event.note];
         if (event.type == 'press') {
           presses.push(event);
-          debugger;
           //event.synth.triggerAttack(event.note, event.velocity);
           // xxxx velocity doesn't work???
           event.synth.triggerAttack(event.note);
@@ -489,7 +493,6 @@ requires jp_doodle, tone, and midi
           });
       };
       add_divs(container) {
-          debugger;
         var namediv = $("<div/>").appendTo(container);
         var familydiv = $("<div/>").appendTo(container);
         var optionsdiv = $("<div/>").appendTo(container);
