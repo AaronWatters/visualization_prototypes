@@ -212,8 +212,9 @@ requires jp_doodle, tone, and midi
             var tracks_div = $("<div/>").appendTo(div);
             tracks_div.css({
                 display: "grid",
-                "grid-template-columns": "auto auto auto",
+                "grid-template-columns": "auto 100px 100px",
                 "background-color": "#fee",
+                "width": "500px",
             });
             var tracks = this.synths;
             tracks.forEach(function(track) {
@@ -494,7 +495,9 @@ requires jp_doodle, tone, and midi
       };
       add_divs(container) {
         var namediv = $("<div/>").appendTo(container);
+        namediv.css({"border-top": "1px solid #dfdfdf"})
         var familydiv = $("<div/>").appendTo(container);
+        familydiv.css({"border-top": "1px solid #afafaf"})
         var optionsdiv = $("<div/>").appendTo(container);
         namediv.html("" + this.name);
         familydiv.html("" + this.family);
