@@ -25,8 +25,6 @@ var setup = function () {
   //    "Why Do Lovers Break Eachother's Hearts?");
   piano_element.piano.add_midi_url_button('./canon_simplified_for_piano.mid', "Pachelbel's Canon - simple arrangement for piano");
   piano_element.piano.add_midi_url_button('./Bach-Jesu_Joy_of_Man_Desiring.mid', "Bach: Jesu Joy of Man's Desiring");
-  piano_element.piano.add_midi_url_button('./beethoven_opus10_1_format0.mid', 'Beethoven: Opus 10');
-  piano_element.piano.add_midi_url_button('./handel_hallelujah.mid', 'Handel: Hallelujah Chorus');
   //piano_element.piano.add_midi_url_button('./Take-Five-1.mid', 'Take five');
   piano_element.piano.add_midi_url_button('./snoopy.mid', 'Peanuts (Linus and Lucy) - Vince Guaraldi');
   piano_element.piano.add_midi_url_button(
