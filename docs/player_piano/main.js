@@ -118,9 +118,9 @@ class Double_Helix {
             background: '#eef',
             alpha: 0.2,
             max_radius: 150,
-            spiral_width: 3,
-            graphic_width: 5,
-            central_radius: 40,
+            spiral_width: 10,
+            graphic_width: 18,
+            central_radius: 50,
           },
           options
         );
@@ -145,7 +145,7 @@ class Double_Helix {
             //var spiral_seq = spiral_points[spiral];
             //spiral_seq.push(xy);
             var [x,y] = xy;
-            that.frame.circle({x: x, y:y, r:s.spiral_width * 3, color:s.spiral_colors[spiral]})
+            that.frame.circle({x: x, y:y, r:s.spiral_width * 2, color:s.spiral_colors[spiral]})
         });
         const frag = 4;
         for (var offset=-6; offset<7; offset++) {
