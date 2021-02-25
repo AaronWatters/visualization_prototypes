@@ -342,6 +342,7 @@ requires jp_doodle, tone, and midi
           that.check_events();
         });
       } else {
+          this.play_midi_button.html("Complete: Reset");
           that.event_loop_active = false;
       }
       if (this.settings.presses_callback) {
