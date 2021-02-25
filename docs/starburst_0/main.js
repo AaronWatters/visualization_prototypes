@@ -15,7 +15,8 @@ const settings = {
 var setup = function () {
     debugger;
     info.html("Set up SampleLibrary.")
-    SampleLibrary.baseUrl = "https://nbrosowsky.github.io/tonejs-instruments/samples/";
+    //SampleLibrary.baseUrl = "https://nbrosowsky.github.io/tonejs-instruments/samples/";
+  SampleLibrary.baseUrl = "../sound_samples/";
   info.html('setting up volume.');
   var element = $('#piano');
   element.empty();
@@ -230,6 +231,7 @@ function add_volume(element) {
         var presses = element.current_presses;
         var info = midi_chord_info(presses);
         var notes_and_octaves = info.notes_and_octaves;
+        var notes = info.notes;
         var note_positions = chord_positions(notes);
         var count = 0;
         var sum = [0, 0, 0];
@@ -590,8 +592,8 @@ var parse_midi_note = function(name) {
 };
 
 var midi_chord_info = function(names) {
-    notes_and_octaves = [];
-    notes = {};
+    var notes_and_octaves = [];
+    var notes = {};
     for (name in names) {
         var n_o = parse_midi_note(name);
         var [name, octave] = n_o

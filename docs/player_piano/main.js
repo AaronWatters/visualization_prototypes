@@ -3,7 +3,8 @@ var piano_element;
 
 var setup = function () {
   info.html("Set up SampleLibrary.")
-  SampleLibrary.baseUrl = "https://nbrosowsky.github.io/tonejs-instruments/samples/";
+  //SampleLibrary.baseUrl = "https://nbrosowsky.github.io/tonejs-instruments/samples/";
+  SampleLibrary.baseUrl = "../sound_samples/";
   info.html('setting up piano.');
   var element = $('#piano');
   piano_element = element;  // for debugging
