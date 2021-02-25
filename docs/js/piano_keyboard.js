@@ -304,6 +304,11 @@ requires jp_doodle, tone, and midi
     check_events() {
       var that = this;
       var now = Tone.now();
+      var fnow = Math.floor(now);
+      if ((!this.last_now) || (fnow - this.last_now > 1)) {
+          this.play_midi_button.html("Reset " + fnow);
+          this.last_now = fnow;
+      }
       var events = this.events;
       var nevents = events.length;
       var presses = [];
