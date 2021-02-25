@@ -258,7 +258,7 @@ requires jp_doodle, tone, and midi
           // reset.
           that.set_up_midi_json();
       } else {
-        this.play_midi_button.html('Reset midi');
+        this.play_midi_button.html('Reset: Initializing');
         this.disable_key_draw = true;
         this.silent = true;
         this.playing = true;
