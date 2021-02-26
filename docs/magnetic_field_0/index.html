@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Magnetic field around a neutron star</title>
+    <meta charset="utf-8" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/normalize.css" />
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="../css/jquery-ui.css" />
+  </head>
+
+  <body>
+    <div class="layout">
+      <section class="section">
+        <div class="section__inner">
+          <h4 class="title">Magnetic field around a neutron star</h4>
+
+          <p class="subtitle"> 
+              This page displays a snapshot of a simulation of a magnetic field surrounding
+              a neutron star.  The source data was generated at the Flatiron Institute
+              by Yajie Yuan.
+            </p>
+
+            <p>
+                The visualization is interactive.  The solid surface represents
+                an isosurface
+                the logarithm of the magnitude of the magnetic field.
+                Adjust the slider to change the isosurface threshold.
+                Rotate the 3d figures by dragging the mouse over the dot cloud.
+            </p>
+
+          <p class="info-text" id="info">Page not initialized.</p>
+
+          <div id="viz">The visualization should load here.</div>
+        </div>
+      </section>
+    </div>
+
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery-ui.js"></script>
+    <script src="../js/canvas_2d_widget_helper.js"></script>
+    <script src="../js/dual_canvas_helper.js"></script>
+    <script src="../js/three.min.js"></script>
+    <script src="../js/OrbitControls.js"></script>
+    <script src="../js/Tonejs-Instruments.js"></script>
+    <script src="../js/piano_keyboard.js"></script>
+    <script src="../js/feedWebGL.js"></script>
+    <script src="../js/feedbackSurfaces.js"></script>
+    <script src="../js/streamLiner.js"></script>
+    <script src="../js/volume32.js"></script>
+    <script src="./main.js"></script>
+
+    <script>
+      //load_file("json/Fake.json")
+      setup();
+    </script>
+  </body>
+</html>
