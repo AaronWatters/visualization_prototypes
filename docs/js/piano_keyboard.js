@@ -15,6 +15,14 @@ requires jp_doodle, tone, and midi
     return new PianoKeyboard(element, options);
   };
 
+  var instrument_defaults = {
+      "piano": "harp",
+      "drums": "(disable)",
+      "reed": "trumpet",
+      "bass": "bass-electric",
+      "brass": "trombone",
+  }
+
   class PianoKeyboard {
     constructor(element, options) {
       var that = this;
@@ -510,7 +518,10 @@ requires jp_doodle, tone, and midi
         //optionsdiv.html("options...");
         var select = $("<select/>").appendTo(optionsdiv);
         var selected = "piano";
-        SampleLibrary.list.forEach(function(instrument_name) {
+        selected = instrument_defaults[this.family] || selected;
+        var instrument_name_list = [...SampleLibrary.list];
+        instrument_name_list.push(this.disable);
+        instrument_name_list.forEach(function(instrument_name) {
             if (selected == instrument_name) {
                 $("<option selected>" + instrument_name + "</option>").appendTo(select);
             } else {
@@ -518,7 +529,7 @@ requires jp_doodle, tone, and midi
             }
             //selected = false;
         });
-        $("<option>" + this.disable + "</option>").appendTo(select);
+        //$("<option>" + this.disable + "</option>").appendTo(select);
         this.select = select;
       };
       dispose() {
