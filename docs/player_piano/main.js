@@ -131,21 +131,20 @@ class Double_Helix {
             width: 400,
             height: 100,
             canvas_height: 400,
-            spiral_colors: ['blue', 'red'],
+            //spiral_colors: ['blue', 'red'], // no longer used
             interp_colors: [
                 [
-                    [0, 0, 0],
-                    [255, 0, 0],
+                    [0, 0, 0],   // low color, spiral 0
+                    [255, 0, 0], // high color, spiral 0
                 ], 
                 [
-                    [0, 0, 255],
-                    [0, 0, 255],
+                    [0, 0, 0],  // low color, spiral 1
+                    [0, 0, 255],  // high color, spiral 1
                 ], 
             ],
             min_width: 5,
             max_width: 20,
-            tone_start_color: '#909',
-            tone_end_color: '#fff',
+            tone_start_color: '#909',  // this is the color of the wandering circle
             low_octave: 2,
             high_octave: 5,
             low_octave_c: 2,
@@ -156,8 +155,8 @@ class Double_Helix {
             spiral_width: 10,
             graphic_width: 18,
             central_radius: 50,
-            low_octave_color: [0, 50, 0],
-            high_octave_color: [150, 155, 255],
+            low_octave_color: [0, 50, 0],  // color for very low notes
+            high_octave_color: [150, 155, 255],  // color for very high notes
           },
           options
         );
