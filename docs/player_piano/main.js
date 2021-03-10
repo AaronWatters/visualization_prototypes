@@ -112,6 +112,14 @@ function color_gradient(for_value, min_rgb, max_rgb, min_value, max_value) {
     return "rgb(" +  color + ")";
 };
 
+function interpolate(for_value, to_min, to_max, from_min, from_max) {
+    var lmd = (for_value - from_min) * 1.0 / (from_max - from_min);
+    lmd = Math.min(1.0, lmd);
+    lmd = Math.max(0.0, lmd);
+    var lmd1 = 1.0 - lmd;
+    return lmd * to_max + lmd1 * to_min;
+}
+
 class Double_Helix {
 
     constructor(canvas, options) {
@@ -124,16 +132,32 @@ class Double_Helix {
             height: 100,
             canvas_height: 400,
             spiral_colors: ['blue', 'red'],
+            interp_colors: [
+                [
+                    [0, 0, 0],
+                    [255, 0, 0],
+                ], 
+                [
+                    [0, 0, 255],
+                    [0, 0, 255],
+                ], 
+            ],
+            min_width: 5,
+            max_width: 20,
             tone_start_color: '#909',
             tone_end_color: '#fff',
             low_octave: 2,
-            high_octave: 7,
+            high_octave: 5,
+            low_octave_c: 2,
+            high_octave_c: 4,
             background: '#eef',
             alpha: 0.2,
             max_radius: 150,
             spiral_width: 10,
             graphic_width: 18,
             central_radius: 50,
+            low_octave_color: [0, 50, 0],
+            high_octave_color: [150, 155, 255],
           },
           options
         );
@@ -152,6 +176,7 @@ class Double_Helix {
         });
         */
         var font = "normal 100px Arial";
+        var zfont = "normal 120px Arial";
         var xs = -3.7;
         var ts = 0.2;
         var d = 1.0;
@@ -191,17 +216,28 @@ class Double_Helix {
         that.frame.text({
             x:z_ind[0] + ts, 
             y:z_ind[1] + ts, 
-            text: "Z", font:font,
+            text: "Z", font:zfont,
             valign: "center", align: "center"
         });
         var spiral_points = [[], []];
+        var count = 0;
+        var ln = note_positions.length;
         note_positions.forEach(function(position) {
             var [offset, spiral, note] = position;
             var xy = that.spiral_position_2d(offset, spiral);
             //var spiral_seq = spiral_points[spiral];
             //spiral_seq.push(xy);
             var [x,y] = xy;
-            that.frame.circle({x: x, y:y, r:s.spiral_width * 2, color:s.spiral_colors[spiral]})
+            var colors = s.interp_colors[spiral];
+            var color = color_gradient(
+                count, colors[0], colors[1], 0, ln,
+            );
+            var width_c = interpolate(
+                count, s.min_width, s.max_width, 0, ln,
+            )
+            //that.frame.circle({x: x, y:y, r:s.spiral_width * 2, color:s.spiral_colors[spiral]});
+            that.frame.circle({x: x, y:y, r: width_c * 2, color:color});
+            count ++;
         });
         const frag = 4;
         for (var offset=-6; offset<7; offset++) {
@@ -215,6 +251,33 @@ class Double_Helix {
             }
         }
 
+        for (var nspiral=0; nspiral<2; nspiral++) {
+            //debugger;
+            var points = spiral_points[nspiral];
+            var colors = s.interp_colors[nspiral];
+            var min_c = colors[0];
+            var max_c = colors[1];
+            var ln = points.length;
+            for (var i=1; i<ln; i++) {
+                var color = color_gradient(
+                    i, min_c, max_c, 0, ln,
+                );
+                var width_c = interpolate(
+                    i, s.min_width, s.max_width, 0, ln,
+                )
+                var [x0, y0] = points[i-1]
+                var [x1, y1] = points[i]
+                this.frame.line({
+                    x2: x0, 
+                    y2: y0,
+                    x1: x1,
+                    y1: y1,
+                    color:color,
+                    lineWidth: width_c,
+                })
+            }
+        }
+        /*
         this.frame.polygon({
             points: spiral_points[0],
             fill: false,
@@ -229,10 +292,15 @@ class Double_Helix {
             color: s.spiral_colors[1],
             lineWidth: s.spiral_width,
         });
+        */
         this.center_circle = this.frame.circle({x:0, y:0, r:0, color:s.tone_start_color, name:true});
         this.center_tone_xy = [0, 0];
         this.note_graphics = [];
     };
+    color_for_octave(octave_number) {
+        var s = this.settings;
+        return color_gradient(octave_number, s.low_octave_color, s.high_octave_color, s.low_octave_c, s.high_octave_c);
+    }
     inactive_note_graphics(length) {
         var result = [];
         var note_graphics = this.note_graphics;
@@ -287,6 +355,8 @@ class Double_Helix {
         for (var i=0; i<presses.length; i++) {
             var press = presses[i];
             var name = press.note;
+            var [note1, octave] = parse_midi_note(name);
+            press.graphics.octave = octave;
             var note = name_to_note[name];
             var [offset, spiral] = note_positions[note];
             var xy = this.spiral_position_2d(offset, spiral);
@@ -344,6 +414,7 @@ class NoteGraphic {
         this.active = false;
         this.in_helix = in_helix;
         this.position = [0, 0];
+        this.octave = 3.5; // temp values
         var s = in_helix.settings;
         var frame = in_helix.frame;
         this.circle = frame.circle({x:0, y:0, r:0, lineWidth:0, color:s.tone_start_color, fill:false, name:true});
@@ -360,12 +431,15 @@ class NoteGraphic {
         this.active = false;
     }
     change(cx, cy, duration) {
+        debugger;
+        var octave = this.octave;
+        var color = this.in_helix.color_for_octave(octave);
         var s = this.in_helix.settings;
         var [x1, y1] = this.position;
-        this.circle.change({lineWidth: s.graphic_width, x: x1, y: y1, r:s.max_radius});
+        this.circle.change({lineWidth: s.graphic_width, x: x1, y: y1, r:s.max_radius, color:color,});
         //this.line.change({lineWidth: s.graphic_width});
         this.circle.transition({r: 0, lineWidth: 0}, duration);
-        this.line.change({x1: x1, y1: y1, x2: cx, y2: cy, lineWidth: s.graphic_width});
+        this.line.change({x1: x1, y1: y1, x2: cx, y2: cy, lineWidth: s.graphic_width, color:color,});
         this.line.transition({lineWidth: 0, x2:x1, y2:y1}, duration);
         this.active = true;
     }
