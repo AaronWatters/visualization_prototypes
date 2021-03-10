@@ -99,6 +99,19 @@ function chord_span(note_to_positions) {
     return Math.max(...positions) - Math.min(...positions);
 };
 
+function color_gradient(for_value, min_rgb, max_rgb, min_value, max_value) {
+    var lmd = (for_value - min_value) * 1.0 / (max_value - min_value);
+    lmd = Math.min(1.0, lmd);
+    lmd = Math.max(0.0, lmd);
+    var lmd1 = 1.0 - lmd;
+    var color = [];
+    for (var i=0; i<3; i++) {
+        var ci = Math.round(max_rgb[i] * lmd + min_rgb[i] * lmd1);
+        color.push(ci)
+    }
+    return "rgb(" +  color + ")";
+};
+
 class Double_Helix {
 
     constructor(canvas, options) {
@@ -138,6 +151,49 @@ class Double_Helix {
           color: s.background,
         });
         */
+        var font = "normal 100px Arial";
+        var xs = -3.7;
+        var ts = 0.2;
+        var d = 1.0;
+        var hl = 0.1;
+        var origin = this.project2d([0, 0, 0]);
+        var x_ind = this.project2d([d, 0, 0]);
+        var y_ind = this.project2d([0, d, 0]);
+        var z_ind = this.project2d([0, 0, d*1.323]);
+        origin[0] += xs;
+        x_ind[0] += xs;
+        y_ind[0] += xs;
+        z_ind[0] += xs;
+        that.frame.arrow({
+            x1: origin[0], y1:origin[1], x2:x_ind[0], y2:x_ind[1],
+           lineWidth: s.spiral_width, head_length: hl, symmetric: true,
+        });
+        that.frame.text({
+            x:x_ind[0] + ts, 
+            y:x_ind[1], 
+            text: "X", font:font,
+            valign: "center",
+        });
+        that.frame.arrow({
+            x1: origin[0], y1:origin[1], x2:y_ind[0], y2:y_ind[1],
+            lineWidth: s.spiral_width, head_length: hl, symmetric: true,
+        });
+        that.frame.text({
+            x:y_ind[0], 
+            y:y_ind[1] + ts, 
+            text: "Y", font:font,
+            align: "center",
+        });
+        that.frame.arrow({
+            x1: origin[0], y1:origin[1], x2:z_ind[0], y2:z_ind[1],
+            lineWidth: s.spiral_width, head_length: hl * 1.3, symmetric: true,  s
+        });
+        that.frame.text({
+            x:z_ind[0] + ts, 
+            y:z_ind[1] + ts, 
+            text: "Z", font:font,
+            valign: "center", align: "center"
+        });
         var spiral_points = [[], []];
         note_positions.forEach(function(position) {
             var [offset, spiral, note] = position;
