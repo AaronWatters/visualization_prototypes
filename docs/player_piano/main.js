@@ -18,6 +18,9 @@ var setup = function () {
     });
   //element.piano.add_midi_url_button('./mary_had_a_little_lamb_PNO.mid', 'Mary had a little lamb');
   //element.piano.add_midi_url_button('./Bach-Jesu_Joy_of_Man_Desiring.mid', "Bach: Jesu Joy of Man's Desiring");
+  piano_element.piano.add_midi_url_button(
+    './Coltrane_giant_steps.mid', 
+    "John Coltrane - Giant Steps");
   element.piano.add_midi_url_button('./beethoven_opus10_1_format0.mid', 'Beethoven: Opus 10');
   element.piano.add_midi_url_button('./handel_hallelujah.mid', 'Handel: Hallelujah Chorus');
   element.piano.add_midi_url_button('./Take-Five-1.mid', 'Take five');
@@ -28,10 +31,6 @@ var setup = function () {
   piano_element.piano.add_midi_url_button('./Bach-Jesu_Joy_of_Man_Desiring.mid', "Bach: Jesu Joy of Man's Desiring");
   //piano_element.piano.add_midi_url_button('./Take-Five-1.mid', 'Take five');
   piano_element.piano.add_midi_url_button('./snoopy.mid', 'Peanuts (Linus and Lucy) - Vince Guaraldi');
-  piano_element.piano.add_midi_url_button(
-      './Coltrane_giant_steps.mid', 
-      "John Coltrane - Giant Steps");
-  info.html('Piano ready.');
 };
 
 // xxxx much pasted from starburst_0/main
