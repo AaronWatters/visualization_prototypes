@@ -109,6 +109,7 @@ requires jp_doodle, tone, and midi
       this.play_midi_button.on('click', function () {
         that.play_midi();
       });
+      this.presets_div = $('<div/>').appendTo(this.element);
       this.play_button_div.hide();
       this.file_drop_div = $('<div>Choose midi file</div>').appendTo(element);
       this.file_drop_input = $('<input type="file" accept="audio/midi" />').appendTo(this.file_drop_div);
@@ -237,9 +238,9 @@ requires jp_doodle, tone, and midi
     add_midi_url_button(url, title) {
       title = title || url;
       var that = this;
-      var file_drop_div = this.file_drop_div;
+      var presets_div = this.presets_div;
       //file_drop_div.height(file_drop_div.height() + 20);
-      var url_div = $('<div/>').appendTo(file_drop_div);
+      var url_div = $('<div/>').appendTo(presets_div);
       //var url_div = $("<div/>").appendTo(this.element);
       var url_button = $('<button> ' + title + ' </button>').appendTo(url_div);
       var url_click = function () {
