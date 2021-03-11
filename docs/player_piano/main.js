@@ -176,6 +176,7 @@ class Double_Helix {
         var font = "normal 100px Arial";
         var zfont = "normal 120px Arial";
         var xs = -3.7;
+        var distortion = 0.2
         var ts = 0.2;
         var d = 1.0;
         var hl = 0.1;
@@ -183,10 +184,10 @@ class Double_Helix {
         var x_ind = this.project2d([d, 0, 0]);
         var y_ind = this.project2d([0, d, 0]);
         var z_ind = this.project2d([0, 0, d*1.323]);
-        origin[0] += xs;
+        origin[0] += xs + distortion;
         x_ind[0] += xs;
         y_ind[0] += xs;
-        z_ind[0] += xs;
+        z_ind[0] += xs + distortion;
         that.frame.arrow({
             x1: origin[0], y1:origin[1], x2:x_ind[0], y2:x_ind[1],
            lineWidth: s.spiral_width, head_length: hl, symmetric: true,
@@ -434,7 +435,9 @@ class NoteGraphic {
         var color = this.in_helix.color_for_octave(octave);
         var s = this.in_helix.settings;
         var [x1, y1] = this.position;
-        this.circle.change({lineWidth: s.graphic_width, x: x1, y: y1, r:s.max_radius, color:color,});
+        var radius_scale = interpolate(octave, 2, 0.3, s.low_octave, s.high_octave);
+        var radius = s.max_radius * radius_scale;
+        this.circle.change({lineWidth: s.graphic_width, x: x1, y: y1, r:radius, color:color,});
         //this.line.change({lineWidth: s.graphic_width});
         this.circle.transition({r: 0, lineWidth: 0}, duration);
         this.line.change({x1: x1, y1: y1, x2: cx, y2: cy, lineWidth: s.graphic_width, color:color,});
