@@ -126,16 +126,15 @@ requires jp_doodle, tone, and midi
       //   });
       // }
 
-      var fade_area = $("<div/>").appendTo(element);
-      $("<span> Enable graphical fading: </span>").appendTo(fade_area);
+      var fade_area = $("<label class='checkbox-wrap'/>").appendTo(element);
       this.fade_check = $('<input type="checkbox" checked/>').appendTo(fade_area);
-      $("<span> [graphical fading may degrade audio quality] </span>").appendTo(fade_area);
+      $("<span class='label-body'>Enable graphical fading [graphical fading may degrade audio quality] </span>").appendTo(fade_area);
       this.fading = true;
       this.fade_check.change(function() {
           that.fading = that.fade_check.is(":checked");
       });
 
-      this.info = $('<div>keyboard drawn</div>').appendTo(element);
+      this.info = $('<div class="info-text">keyboard drawn</div>').appendTo(element);
       this.piano = new Tone.PolySynth(Tone.Synth, {
         volume: -8,
         oscillator: {
