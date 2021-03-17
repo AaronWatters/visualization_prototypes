@@ -111,20 +111,20 @@ requires jp_doodle, tone, and midi
       });
       this.presets_div = $('<div/>').appendTo(this.element);
       this.play_button_div.hide();
-      this.file_drop_div = $('<div>Choose midi file</div>').appendTo(element);
-      this.file_drop_input = $('<input type="file" accept="audio/midi" />').appendTo(this.file_drop_div);
-      if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
-        this.file_drop_div.html("THIS BROWSER DOESN'T SUPPORT FILE PROCESSING.");
-      } else {
-        this.file_drop_input.on('change', function (e) {
-          const files = e.target.files;
-          if (files.length > 0) {
-            const file = files[0];
-            that.info.html('loaded: ' + file.name);
-            that.parseFile(file);
-          }
-        });
-      }
+      // this.file_drop_div = $('<div>Choose midi file</div>').appendTo(element);
+      // this.file_drop_input = $('<input type="file" accept="audio/midi" />').appendTo(this.file_drop_div);
+      // if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
+      //   this.file_drop_div.html("THIS BROWSER DOESN'T SUPPORT FILE PROCESSING.");
+      // } else {
+      //   this.file_drop_input.on('change', function (e) {
+      //     const files = e.target.files;
+      //     if (files.length > 0) {
+      //       const file = files[0];
+      //       that.info.html('loaded: ' + file.name);
+      //       that.parseFile(file);
+      //     }
+      //   });
+      // }
 
       var fade_area = $("<div/>").appendTo(element);
       $("<span> Enable graphical fading: </span>").appendTo(fade_area);
