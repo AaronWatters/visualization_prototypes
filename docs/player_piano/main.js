@@ -19,18 +19,18 @@ var setup = function () {
   //element.piano.add_midi_url_button('./mary_had_a_little_lamb_PNO.mid', 'Mary had a little lamb');
   //element.piano.add_midi_url_button('./Bach-Jesu_Joy_of_Man_Desiring.mid', "Bach: Jesu Joy of Man's Desiring");
   piano_element.piano.add_midi_url_button(
-    './Coltrane_giant_steps.mid', 
+    './Coltrane_giant_steps.mid',
     "John Coltrane - Giant Steps");
-  element.piano.add_midi_url_button('./beethoven_opus10_1_format0.mid', 'Beethoven: Opus 10');
-  element.piano.add_midi_url_button('./handel_hallelujah.mid', 'Handel: Hallelujah Chorus');
-  element.piano.add_midi_url_button('./Take-Five-1.mid', 'Take five');
+//   element.piano.add_midi_url_button('./beethoven_opus10_1_format0.mid', 'Beethoven: Opus 10');
+//   element.piano.add_midi_url_button('./handel_hallelujah.mid', 'Handel: Hallelujah Chorus');
+//   element.piano.add_midi_url_button('./Take-Five-1.mid', 'Take five');
   //element.piano.add_midi_url_button(
-  //    './7862_Why-Do-Lovers-Break-Each-Others-Hearts.mid', 
+  //    './7862_Why-Do-Lovers-Break-Each-Others-Hearts.mid',
   //    "Why Do Lovers Break Eachother's Hearts?");
-  piano_element.piano.add_midi_url_button('./canon_simplified_for_piano.mid', "Pachelbel's Canon - simple arrangement for piano");
-  piano_element.piano.add_midi_url_button('./Bach-Jesu_Joy_of_Man_Desiring.mid', "Bach: Jesu Joy of Man's Desiring");
+//   piano_element.piano.add_midi_url_button('./canon_simplified_for_piano.mid', "Pachelbel's Canon - simple arrangement for piano");
+//   piano_element.piano.add_midi_url_button('./Bach-Jesu_Joy_of_Man_Desiring.mid', "Bach: Jesu Joy of Man's Desiring");
   //piano_element.piano.add_midi_url_button('./Take-Five-1.mid', 'Take five');
-  piano_element.piano.add_midi_url_button('./snoopy.mid', 'Peanuts (Linus and Lucy) - Vince Guaraldi');
+//   piano_element.piano.add_midi_url_button('./snoopy.mid', 'Peanuts (Linus and Lucy) - Vince Guaraldi');
 };
 
 // xxxx much pasted from starburst_0/main
@@ -89,7 +89,7 @@ function chord_positions(notes) {
     }
     return positions;
 };
- 
+
 function chord_span(note_to_positions) {
     var positions = [];
     for (note in note_to_positions) {
@@ -135,11 +135,11 @@ class Double_Helix {
                 [
                     [0, 0, 0],   // low color, spiral 0
                     [255, 0, 0], // high color, spiral 0
-                ], 
+                ],
                 [
                     [0, 0, 0],  // low color, spiral 1
                     [0, 0, 255],  // high color, spiral 1
-                ], 
+                ],
             ],
             min_width: 5,
             max_width: 20,
@@ -193,8 +193,8 @@ class Double_Helix {
            lineWidth: s.spiral_width, head_length: hl, symmetric: true,
         });
         that.frame.text({
-            x:x_ind[0] + ts, 
-            y:x_ind[1], 
+            x:x_ind[0] + ts,
+            y:x_ind[1],
             text: "X", font:font,
             valign: "center",
         });
@@ -203,8 +203,8 @@ class Double_Helix {
             lineWidth: s.spiral_width, head_length: hl, symmetric: true,
         });
         that.frame.text({
-            x:y_ind[0], 
-            y:y_ind[1] + ts, 
+            x:y_ind[0],
+            y:y_ind[1] + ts,
             text: "Y", font:font,
             align: "center",
         });
@@ -213,8 +213,8 @@ class Double_Helix {
             lineWidth: s.spiral_width, head_length: hl * 1.3, symmetric: true,  s
         });
         that.frame.text({
-            x:z_ind[0] + ts, 
-            y:z_ind[1] + ts, 
+            x:z_ind[0] + ts,
+            y:z_ind[1] + ts,
             text: "Z", font:zfont,
             valign: "center", align: "center"
         });
@@ -267,7 +267,7 @@ class Double_Helix {
                 var [x0, y0] = points[i-1]
                 var [x1, y1] = points[i]
                 this.frame.line({
-                    x2: x0, 
+                    x2: x0,
                     y2: y0,
                     x1: x1,
                     y1: y1,

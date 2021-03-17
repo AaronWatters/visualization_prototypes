@@ -34,3 +34,6 @@
   column-gap: 1rem;
   margin: 2rem 0;
 }
+button {
+  margin-bottom: 15px;
+}

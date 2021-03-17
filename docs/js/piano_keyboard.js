@@ -233,6 +233,7 @@ requires jp_doodle, tone, and midi
             // no info
             div.empty();
             div.html("No midi data yet loaded.")
+            div.addClass('info-text')
         }
     };
     add_midi_url_button(url, title) {
