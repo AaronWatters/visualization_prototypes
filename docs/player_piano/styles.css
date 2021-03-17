@@ -36,7 +36,23 @@
 }
 button {
   margin-bottom: 15px;
+  margin-top: 15px;
 }
 label > .label-body {
   color: #555;
+  font-size: 1.3rem;
+}
+
+.test {
+  color: #9e0142;
+  color: #d53e4f;
+  color: #f46d43;
+  color: #fdae61;
+  color: #fee08b;
+  color: #ffffbf;
+  color: #e6f598;
+  color: #abdda4;
+  color: #66c2a5;
+  color: #3288bd;
+  color: #5e4fa2;
 }

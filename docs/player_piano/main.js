@@ -133,17 +133,17 @@ class Double_Helix {
             //spiral_colors: ['blue', 'red'], // no longer used
             interp_colors: [
                 [
-                    [0, 0, 0],   // low color, spiral 0
-                    [255, 0, 0], // high color, spiral 0
+                    [158, 1, 66],   // low color, spiral 0
+                    [213, 62, 79], // high color, spiral 0
                 ],
                 [
-                    [0, 0, 0],  // low color, spiral 1
-                    [0, 0, 255],  // high color, spiral 1
+                    [49, 57, 144],  // low color, spiral 1
+                    [1, 111, 185],  // high color, spiral 1
                 ],
             ],
             min_width: 5,
-            max_width: 20,
-            tone_start_color: '#909',  // this is the color of the wandering circle
+            max_width: 9,
+            tone_start_color: '#e6f598',  // this is the color of the wandering circle
             low_octave: 2,
             high_octave: 5,
             low_octave_c: 2,

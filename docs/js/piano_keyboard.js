@@ -216,7 +216,7 @@ requires jp_doodle, tone, and midi
         if (info) {
             // display info
             div.empty();
-            $("<div> Midi name: " + info.header.name + "</div>").appendTo(div);
+            $("<p> Customize instruments: " + info.header.name + "</p>").appendTo(div);
             var tracks_div = $("<div/>").appendTo(div);
             tracks_div.css({
                 display: "grid",
