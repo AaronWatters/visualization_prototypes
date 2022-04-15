@@ -1,0 +1,35 @@
+{
+    "num_rows": 119,
+    "num_cols": 119,
+    "num_layers": 98,
+    "threshold": 1.3289271106814355,
+    "camera_up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+    },
+    "camera_offset": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+    },
+    "camera_distance_multiple": 2.0,
+    "di": [
+        1,
+        0,
+        0
+    ],
+    "dj": [
+        0,
+        1,
+        0
+    ],
+    "dk": [
+        0,
+        0,
+        1
+    ],
+    "width": 1500,
+    "_description": "Volume array meta data.",
+    "binary_file": "./volume_html/data/bytes.bin"
+}

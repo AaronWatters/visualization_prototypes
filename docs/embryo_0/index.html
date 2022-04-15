@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Embryo gene expression proof of concept</title>
+    <meta charset="utf-8" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/normalize.css" />
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="../css/jquery-ui.css" />
+  </head>
+
+  <body>
+    <div class="layout">
+      <section class="section">
+        <div class="section__inner">
+          <h4 class="title">Embryo gene expression proof of concept</h4>
+
+          <p class="subtitle"> This page illustrates gene expression in a developing embryo over time.</p>
+
+          <img src="embryo_animated.gif?A=B">
+          <div>
+              <span style="color: rgb(255, 0, 0);">Wg ⬤ ; </span>
+              <span style="color: rgb(0, 128, 0);">Byn ⬤ ; </span>
+              <span style="color: rgb(0, 0, 255);">Hkb ⬤ ; </span>
+              <span style="color: cyan;">Tll ⬤ ; </span>
+              <span style="color: magenta;">Fkh ⬤ ; </span>
+            </div>
+
+            <p>
+                The GIF shown above is a fixed animation of the visualization.
+                To run the visualization interactively please upload an appropriate data file below.
+            </p>
+
+          <p>
+            Load a JSON data file to initialize the visualization.
+            The file must be preprocessed to group the gene expression information by timestamp.
+            A script for creating the appropriate input file is here:
+            <a href="https://github.com/AaronWatters/visualization_prototypes/blob/main/docs/embryo_0/make_genes_by_time_json.py">
+                https://github.com/AaronWatters/visualization_prototypes/blob/main/docs/embryo_0/make_genes_by_time_json.py</a>
+          </p>
+          <p>
+            After the visualization is loaded, adjust the time slice using the slider or rotate the view by dragging in the canvas.
+          </p>
+
+          <p class="info-text" id="info">Page not initialized.</p>
+
+          <div id="embryo">Embryo should load here.</div>
+        </div>
+      </section>
+    </div>
+
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery-ui.js"></script>
+    <script src="../js/canvas_2d_widget_helper.js"></script>
+    <script src="../js/dual_canvas_helper.js"></script>
+    <script src="../js/nd_frame.js"></script>
+    <script src="./embryo.js"></script>
+    <script src="./main.js"></script>
+    <script>
+      //load_file("json/Fake.json")
+      setup();
+    </script>
+  </body>
+</html>

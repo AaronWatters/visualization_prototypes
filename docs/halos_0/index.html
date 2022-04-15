@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Halos proof of concept</title>
+    <meta charset="utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/normalize.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="../css/jquery-ui.css" />
+  </head>
+
+  <body class="container">
+
+
+    <h4>Halos simulation data</h4>
+
+    <p id="info">Page not initialized.</p>
+
+    <div class="halo_grid">
+      <div class="dot_cloud" id="dot_cloud">
+          dot_cloud here
+      </div>
+      <div class="controls" id="controls">
+        <div>
+            <input type="checkbox" id="show_unlabelled" checked>
+        </div>
+        <div> show unlabelled points. </div>
+      </div>
+    </div>
+
+    <script src="../js/three.min.js"></script>
+    <script src="../js/OrbitControls.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery-ui.js"></script>
+    <script src="./main.js"></script>
+    <script>
+      //load_file("json/Fake.json")
+      load_config();
+    </script>
+
+  </body>
+</html>

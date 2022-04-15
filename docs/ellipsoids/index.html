@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Mouse embryo ellipsoids</title>
+    <meta charset="utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/normalize.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="../css/jquery-ui.css" />
+  </head>
+
+  <body class="container" style="margin: 40px;">
+
+    <h3>Mouse embryo ellipsoids</h3>
+
+    <h4>
+        This is an interactive visualization of a developing mouse embryo 
+        over a number of time stamps derived from light sheet microscopy data.
+    </h4>
+
+    <p>
+        The inner ellipsoids represent cell nuclei and the outer ellipsoid approximates the embryo boundary.
+    </p>
+
+    <p>
+        Drag the mouse over the canvas to rotate the figure.
+    </p>
+
+    <o>
+        Slide the slider to change the timestamp.
+    </o>
+
+    <p id="info">Page not initialized.</p>
+
+    <div id="slider" style="margin: 15px"> No slider yet. </div>
+
+    <div id="ellipsoids"> Not loaded. </div>
+
+    <script src="../js/three.min.js"></script>
+    <script src="../js/OrbitControls.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery-ui.js"></script>
+    <script src="./load_ellipsoids.js"></script>
+    <script>
+      //load_file("json/Fake.json")
+      var info = $("#info");
+      info.html("javascript loaded.");
+      load_ellipsoids();
+    </script>
+
+<!--
+    <button onclick="load_ellipsoids()">Load Ellipsoids;</button>
+-->
+
+  </body>
+</html>

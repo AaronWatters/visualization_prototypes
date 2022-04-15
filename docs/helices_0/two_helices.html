@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
+    <title>Helix demo</title>
+    <link rel="stylesheet" href="../css/normalize.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="../css/jquery-ui.css" />
+    <link rel="stylesheet" href="../css/base.css" />
+  </head>
+
+  <body>
+    <div class="layout">
+      <section class="section">
+        <div class="section__inner">
+          <h4 class="title">Helix Demo</h4>
+          <p id="info" class="subtitle">Page not initialized.</p>
+          <div class="halo_grid">
+            <div class="dot_cloud" id="dot_cloud">dot_cloud here</div>
+            <div class="controls" id="controls">
+              <div id="roughnessSlider"></div>
+              <div id="metalnessSlider"></div>
+              <div id="ambientSlider"></div>
+              <div>
+                <label for="colorInput">Color</label>
+                <input type="text" id="colorInput" name="colorInput" />
+                <button id="colorUpdate">update</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script src="../js/three.min.js"></script>
+    <script src="../js/OrbitControls.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery-ui.js"></script>
+    <script src="./two_helices.js"></script>
+    <script>
+      //load_file("json/Fake.json")
+      load_config();
+    </script>
+  </body>
+</html>
