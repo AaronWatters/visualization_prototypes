@@ -5,7 +5,7 @@ var DATA_MAP = {
     "F32Full.json": "F32Full",
     "F32_ICMTE.json": "F32_ICMTE",
 }
-var SIDE = 800;
+var SIDE = 900;
 var radius_multiple = 2;
 
 var info, surfaces, options, filename;
@@ -31,7 +31,7 @@ function load_surfaces() {
 }
 
 function load_selected_file() {
-    var filename = options.find(":selected").val();
+    filename = options.find(":selected").val();
     info.html("loading: " + filename);
     $.getJSON(filename, setup).fail(on_load_failure);
 };
