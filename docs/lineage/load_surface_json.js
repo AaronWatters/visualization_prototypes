@@ -72,6 +72,34 @@ var setup = function(data) {
     })
 };
 
+var timestamp_interval = 15.0; // minutes
+
+var animation_sequence = function() {
+    var animation_length = 60000.0; // milliseconds
+    var rotation_length = 30.0;
+    var nseq = display3d.sequences.length;
+    var interval = animation_length / nseq;
+    var current_sequence = 0;
+    var time_animation_step = function () {
+        display3d.slider.slider("value", current_sequence);
+        var timing = timestamp_interval * current_sequence;
+        info.html("time: " + timing + " minutes.")
+        current_sequence += 1;
+        if (current_sequence < nseq) {
+            setTimeout(time_animation_step, interval);
+        } else {
+            display3d.orbitControls.autoRotate = true;
+            setTimeout(rotation_off, 30000);
+            info.html("time: " + timing + " minutes. Rotating.")
+        }
+    };
+    var rotation_off = function () {
+        display3d.orbitControls.autoRotate = false;
+        info.html("Animation finished.")
+    };
+    time_animation_step();
+};
+
 var update_timestamp = function () {
     var tsindex = display3d.slider.slider("option", "value");
     tree_rect.change({y: ntimestamps - tsindex});
